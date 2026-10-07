@@ -644,7 +644,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16, left: 48),
+        margin: const EdgeInsets.only(bottom: 8, left: 48),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFF243447),
@@ -753,9 +753,9 @@ class _ChatScreenState extends State<ChatScreen> {
           ] else ...[
             // Streaming or plain text fallback
             Text(
-              message.content.isEmpty && message.isGenerating
+              message.content.trim().isEmpty && message.isGenerating
                   ? 'Analyzing question offline...'
-                  : message.content,
+                  : message.content.trim(),
               style: const TextStyle(
                 color: Color(0xFFCBD5E1),
                 fontSize: 14,

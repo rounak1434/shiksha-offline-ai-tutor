@@ -212,36 +212,46 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
       return controller.stream;
     }
 
-    final isMath = effectiveSubject.toLowerCase().contains('math');
-    final assistantPrefix = isMath ? "Solution:\n" : "";
+    final isMathOrNumerical = effectiveSubject.toLowerCase().contains('math') ||
+        (effectiveSubject.toLowerCase().contains('physics') &&
+            (question.contains('calculate') || question.contains('find') || RegExp(r'\d+').hasMatch(question)));
+
+    final structureInstruction = isMathOrNumerical
+        ? "For numerical, math, or problem-solving questions, use these structured headings where applicable:\n"
+          "Given:\n"
+          "Required:\n"
+          "Formula:\n"
+          "Rearrangement:\n"
+          "Substitution:\n"
+          "Calculation:\n"
+          "Unit:\n"
+          "Final Answer:"
+        : "For conceptual questions, use these structured headings where applicable:\n"
+          "Definition:\n"
+          "Explanation:\n"
+          "Key Principle:\n"
+          "Example/Application:\n"
+          "Summary:";
 
     final controller = StreamController<InferenceChunk>();
-    final StringBuffer accumulated = StringBuffer(assistantPrefix);
+    final StringBuffer accumulated = StringBuffer();
 
     final effectiveMaxTokens = (maxTokens == 250)
         ? _calculateDynamicMaxTokens(question, effectiveSubject)
         : maxTokens;
 
-    final modeInstruction = isMath
-        ? "- For mathematics: provide clear, concise step-by-step working and the final answer."
-        : "- For simple factual questions: answer directly in 1 to 3 sentences.\n- For conceptual questions: provide the definition and key explanation in 2 to 3 sentences.";
-
     final systemPrompt =
-        "You are SHIKSHA, an offline school tutor for Class 1–8.\n\n"
-        "The student's selected class and subject are authoritative.\n\n"
-        "Selected class: Class $effectiveGrade\n"
-        "Selected subject: $effectiveSubject\n\n"
-        "Answer the current question only if it is appropriate for the selected class and subject.\n\n"
-        "Do not silently switch to another subject.\n"
-        "Do not silently teach a different class level.\n"
-        "If the question clearly belongs to another subject, explain that the student should switch subjects.\n"
-        "If the topic is clearly outside the selected class curriculum, explain that it is outside the selected class scope.\n"
-        "All responses must be in English.\n"
-        "Never output <think>.\n"
-        "Never expose hidden reasoning.\n"
-        "- Answer directly and concisely. Do not repeat the question or add conversational filler or intros.\n"
-        "- Prefer a complete concise answer over a long incomplete answer. Finish your answer before stopping.\n"
-        "$modeInstruction";
+        "You are SHIKSHA, an offline school AI tutor for Class 1 to Class 8 students.\n\n"
+        "Strict rules:\n"
+        "- The student is in Class $effectiveGrade.\n"
+        "- The selected subject is authoritative: $effectiveSubject.\n"
+        "- Answer only within the selected subject ($effectiveSubject) and Class $effectiveGrade curriculum.\n"
+        "- Keep explanations age-appropriate and easy to understand for a Class $effectiveGrade student.\n"
+        "- Do not silently switch subjects. Do not answer unrelated questions as if they belong to the selected subject.\n"
+        "- If a question belongs to another subject, tell the student to switch to that subject.\n"
+        "- If a topic is clearly outside the Class 1–8 school curriculum, politely state that it is outside the school curriculum.\n"
+        "- Answer directly and concisely in English. Never output <think> or hidden reasoning tags.\n\n"
+        "$structureInstruction";
 
     final userPrompt =
         "/no_think\n"
@@ -252,7 +262,7 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     final serializedPrompt =
         "<|im_start|>system\n$systemPrompt<|im_end|>\n"
         "<|im_start|>user\n$userPrompt<|im_end|>\n"
-        "<|im_start|>assistant\n$assistantPrefix";
+        "<|im_start|>assistant\n";
 
     bool isCompleted = false;
 
@@ -273,7 +283,12 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     subscription = _eventChannel.receiveBroadcastStream().listen(
       (dynamic event) {
         if (event is Map) {
-          final delta = event['delta'] as String? ?? '';
+          final rawDelta = event['delta'] as String? ?? '';
+          // Avoid leading blank newlines at the start of response
+          if (accumulated.isEmpty && rawDelta.trimLeft().isEmpty) {
+            return;
+          }
+          final delta = accumulated.isEmpty ? rawDelta.trimLeft() : rawDelta;
           accumulated.write(delta);
           final done = event['done'] as bool? ?? false;
           final status = event['status'] as String? ?? 'generating';

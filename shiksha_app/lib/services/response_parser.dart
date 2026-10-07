@@ -64,14 +64,16 @@ class ResponseParser {
       final trimmed = line.trim();
       final lower = trimmed.toLowerCase();
 
-      if (lower.startsWith('definition:') || lower == 'definition') {
+      if (lower.startsWith('definition:') || lower == 'definition' ||
+          lower.startsWith('key principle:') || lower == 'key principle') {
         commitCurrentSection();
         currentSection = 'definition';
         final idx = trimmed.indexOf(':');
         if (idx != -1 && idx < trimmed.length - 1) {
           currentBuffer.writeln(trimmed.substring(idx + 1).trim());
         }
-      } else if (lower.startsWith('given:') || lower == 'given') {
+      } else if (lower.startsWith('given:') || lower == 'given' ||
+          lower.startsWith('required:') || lower == 'required') {
         commitCurrentSection();
         currentSection = 'given';
         final idx = trimmed.indexOf(':');
@@ -87,8 +89,11 @@ class ResponseParser {
         }
       } else if (lower.startsWith('explanation:') ||
           lower.startsWith('steps:') ||
+          lower.startsWith('calculation:') ||
+          lower.startsWith('rearrangement:') ||
           lower == 'explanation' ||
-          lower == 'steps') {
+          lower == 'steps' ||
+          lower == 'calculation') {
         commitCurrentSection();
         currentSection = 'explanation';
         final idx = trimmed.indexOf(':');
@@ -98,6 +103,7 @@ class ResponseParser {
         }
       } else if (lower.startsWith('example:') ||
           lower.startsWith('substitution:') ||
+          lower.startsWith('example/application:') ||
           lower == 'example') {
         commitCurrentSection();
         currentSection = 'example';
@@ -114,6 +120,7 @@ class ResponseParser {
         }
       } else if (lower.startsWith('final answer:') ||
           lower.startsWith('answer:') ||
+          lower.startsWith('unit:') ||
           lower == 'final answer') {
         commitCurrentSection();
         currentSection = 'final answer';

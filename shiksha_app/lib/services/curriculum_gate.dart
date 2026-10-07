@@ -27,12 +27,12 @@ class CurriculumGate {
     final q = question.trim().toLowerCase();
     final sub = selectedSubject.trim();
 
-    // 1. OUT_OF_SCOPE: Check for topics clearly beyond Class 1-8 school curriculum
+    // 1. OUT_OF_SCOPE: Check for topics clearly beyond Class 1-8 school curriculum or non-academic
     if (_isOutOfScope(q)) {
       return GateEvaluation(
         status: GateStatus.outOfScope,
         message:
-            "This topic is outside the Class $grade curriculum. In Class $grade $sub, instruction is focused on foundational school curriculum topics. Please ask a question related to your class syllabus.",
+            "SHIKSHA is intended for academic learning for Classes 1–8 within the supported subjects (Mathematics, Science, Computer Science). This topic is outside the school curriculum scope.",
       );
     }
 
@@ -64,18 +64,19 @@ class CurriculumGate {
 
   static bool _isOutOfScope(String q) {
     const outOfScopePatterns = [
+      // Advanced physics / collegiate math
       'quantum field theory',
       'quantum electrodynamics',
       'quantum chromodynamics',
       'string theory',
       'general relativity',
       'tensor calculus',
-      'schrodinger equation',
-      'schrödinger equation',
-      'lagrangian mechanics',
-      'hamiltonian mechanics',
+      'schrodinger',
+      'schrödinger',
+      'lagrangian',
+      'hamiltonian',
       'feynman diagram',
-      'higgs boson mechanism',
+      'higgs boson',
       'differential equation',
       'differential equations',
       'multivariable calculus',
@@ -83,13 +84,35 @@ class CurriculumGate {
       'real analysis',
       'abstract algebra',
       'group theory',
-      'sn1 reaction',
-      'sn2 reaction',
+      'linear transformation',
+      'eigenvalue',
+      'eigenvector',
+      'laplace transform',
+      'fourier transform',
+      // Advanced chemistry & biology
+      'sn1',
+      'sn2',
       'reaction mechanism',
       'stereochemistry',
       'nmr spectroscopy',
       'crispr',
       'recombinant dna',
+      // Non-academic topics
+      'cricket match',
+      'ipl score',
+      'football score',
+      'bollywood',
+      'hollywood',
+      'movie review',
+      'video game',
+      'minecraft',
+      'fortnite',
+      'roblox',
+      'cryptocurrency',
+      'bitcoin',
+      'stock market',
+      'tell me a joke',
+      'write a story about',
     ];
 
     for (final pattern in outOfScopePatterns) {
@@ -97,7 +120,9 @@ class CurriculumGate {
     }
 
     // Check for advanced differential equations like y'' + 4y
-    if (RegExp(r"y\s*''\s*\+\s*").hasMatch(q) || RegExp(r"d\^?2y\/d[tx]\^?2").hasMatch(q)) {
+    if (RegExp(r"y\s*''\s*\+\s*").hasMatch(q) ||
+        RegExp(r"d\^?2y\/d[tx]\^?2").hasMatch(q) ||
+        RegExp(r"dy\/dx").hasMatch(q)) {
       return true;
     }
 
@@ -105,30 +130,68 @@ class CurriculumGate {
   }
 
   static String? _detectSubject(String q) {
-    // A. Mathematics check
-    // Algebra / Equations / Arithmetic formulas
-    final hasMathSymbols = RegExp(r'[0-9]+\s*[\+\-\*\/]\s*[0-9]+').hasMatch(q) ||
-        RegExp(r'solve\s+[0-9a-z\s\+\-\*\/\=]+=[0-9a-z\s\+\-\*\/]+').hasMatch(q) ||
-        RegExp(r'\b[0-9]*[a-z]\s*[\+\-\*\/]\s*[0-9]+\s*=').hasMatch(q) ||
-        q.contains('solve 2x') ||
-        q.contains('2x +') ||
-        q.contains('2x -') ||
-        q.contains('3x +') ||
-        q.contains('linear equation') ||
-        q.contains('quadratic equation') ||
-        q.contains('pythagoras theorem') ||
-        q.contains('pythagorean theorem') ||
-        q.contains('hcf and lcm') ||
-        q.contains('prime factorization') ||
+    // 1. Computer Science detection
+    final isCS = q.contains('python') ||
+        q.contains('programming') ||
+        q.contains('algorithm') ||
+        q.contains('flowchart') ||
+        q.contains('binary') ||
+        RegExp(r'\b(ram|rom|cpu)\b').hasMatch(q) ||
+        q.contains('computer') ||
+        q.contains('software') ||
+        q.contains('hardware') ||
+        q.contains('operating system') ||
+        q.contains('input device') ||
+        q.contains('output device') ||
+        q.contains('storage device') ||
+        q.contains('hard disk') ||
+        q.contains('ssd') ||
+        q.contains('internet') ||
+        q.contains('world wide web') ||
+        q.contains('cyber') ||
+        q.contains('loop in python') ||
+        q.contains('variable in python');
+
+    if (isCS) {
+      return 'Computer Science';
+    }
+
+    // 2. Mathematics detection
+    final hasMathExpr = RegExp(r'\d+\s*[\+\-\*\/]\s*\d+').hasMatch(q) ||
+        RegExp(r'\b\d+x\b').hasMatch(q) ||
+        (q.contains('=') && (q.contains('x') || q.contains('y') || q.contains('a') || q.contains('b'))) ||
+        RegExp(r'^\s*a\s*\+\s*b\s*=\s*\??\s*$').hasMatch(q);
+
+    final hasMathKeywords = q.contains('solve') ||
+        q.contains('equation') ||
+        q.contains('algebra') ||
+        q.contains('quadratic') ||
+        q.contains('polynomial') ||
+        q.contains('fraction') ||
+        q.contains('fractions') ||
+        q.contains('decimal') ||
+        q.contains('percentage') ||
+        q.contains('percent') ||
+        q.contains('ratio') ||
+        q.contains('proportion') ||
+        q.contains('pythagor') ||
+        q.contains('hypotenuse') ||
+        q.contains('perimeter') ||
+        q.contains('circumference') ||
+        q.contains('area of') ||
+        q.contains('volume of') ||
+        q.contains('hcf') ||
+        q.contains('lcm') ||
+        q.contains('prime factor') ||
+        q.contains('prime number') ||
+        q.contains('square root') ||
+        q.contains('cube root') ||
         q.contains('simple interest') ||
         q.contains('compound interest') ||
         q.contains('profit and loss') ||
-        q.contains('fraction') ||
-        q.contains('fractions') ||
-        q.contains('trigonometry') ||
-        RegExp(r'^\s*a\s*\+\s*b\s*=\s*\??\s*$').hasMatch(q);
+        q.contains('trigonometry');
 
-    // Make sure questions like "speed = distance / time" aren't confused as pure math
+    // Make sure physics problems that happen to contain formulas aren't misclassified
     final hasPhysicsContext = q.contains('speed') ||
         q.contains('velocity') ||
         q.contains('acceleration') ||
@@ -136,99 +199,117 @@ class CurriculumGate {
         q.contains('newton') ||
         q.contains('friction') ||
         q.contains('gravity') ||
-        q.contains('density');
+        q.contains('weight') ||
+        q.contains('mass') ||
+        q.contains('density') ||
+        q.contains('energy') ||
+        q.contains('current') ||
+        q.contains('voltage') ||
+        q.contains('circuit');
 
-    if (hasMathSymbols && !hasPhysicsContext) {
+    if ((hasMathExpr || hasMathKeywords) && !hasPhysicsContext) {
       return 'Mathematics';
     }
 
-    // B. Biology check
-    if (q.contains('photosynthesis') ||
+    // 3. Biology detection
+    final isBiology = q.contains('photosynthesis') ||
         q.contains('chlorophyll') ||
-        q.contains('stomata') ||
         q.contains('chloroplast') ||
-        q.contains('human bone') ||
-        q.contains('human bones') ||
-        q.contains('bones does a human') ||
-        q.contains('teeth human have') ||
+        q.contains('stomata') ||
+        q.contains('bone') ||
+        q.contains('bones') ||
         q.contains('skeleton') ||
-        q.contains('digestive system') ||
+        q.contains('teeth') ||
+        q.contains('tooth') ||
+        q.contains('digestive') ||
         q.contains('digestion') ||
-        q.contains('respiratory system') ||
+        q.contains('stomach') ||
+        q.contains('intestine') ||
+        q.contains('respiratory') ||
         q.contains('respiration') ||
-        q.contains('circulatory system') ||
-        q.contains('red blood cells') ||
-        q.contains('white blood cells') ||
+        q.contains('lungs') ||
+        q.contains('circulatory') ||
+        q.contains('heart') ||
+        q.contains('blood') ||
         q.contains('cell membrane') ||
         q.contains('cell wall') ||
         q.contains('mitochondria') ||
+        q.contains('plant cell') ||
+        q.contains('animal cell') ||
         q.contains('pollination') ||
         q.contains('germination') ||
         q.contains('xylem') ||
         q.contains('phloem') ||
         q.contains('ecosystem') ||
         q.contains('food chain') ||
-        q.contains('amoeba')) {
+        q.contains('food web') ||
+        q.contains('herbivore') ||
+        q.contains('carnivore') ||
+        q.contains('amoeba') ||
+        q.contains('bacteria');
+
+    if (isBiology) {
       return 'Biology';
     }
 
-    // C. Physics check
-    if (q.contains("newton's") ||
-        q.contains("newton third") ||
-        q.contains("newton's third") ||
-        q.contains("newton's second") ||
-        q.contains("newton's first") ||
+    // 4. Physics detection
+    final isPhysics = q.contains("newton") ||
         q.contains("laws of motion") ||
         q.contains("law of motion") ||
         q.contains("f = ma") ||
         q.contains("inertia") ||
         q.contains("friction") ||
+        q.contains("gravity") ||
         q.contains("mass vs weight") ||
-        q.contains("difference between mass and weight") ||
+        q.contains("weight vs mass") ||
         q.contains("weight on moon") ||
-        q.contains("electric current") ||
-        q.contains("electric circuit") ||
-        q.contains("reflection of light") ||
-        q.contains("refraction") ||
-        q.contains("concave mirror") ||
-        q.contains("convex mirror") ||
-        q.contains("sound waves") ||
-        q.contains("atmospheric pressure") ||
+        q.contains("speed") ||
+        q.contains("velocity") ||
+        q.contains("acceleration") ||
+        q.contains("work and energy") ||
         q.contains("kinetic energy") ||
         q.contains("potential energy") ||
-        q.contains("archimedes principle")) {
+        q.contains("electric current") ||
+        q.contains("circuit") ||
+        q.contains("ohm's law") ||
+        q.contains("reflection of light") ||
+        q.contains("refraction") ||
+        q.contains("concave") ||
+        q.contains("convex") ||
+        q.contains("sound waves") ||
+        q.contains("frequency") ||
+        q.contains("atmospheric pressure") ||
+        q.contains("archimedes principle") ||
+        q.contains("density and buoyancy");
+
+    if (isPhysics) {
       return 'Physics';
     }
 
-    // D. Chemistry check
-    if (q.contains('chemical reaction') ||
+    // 5. Chemistry detection
+    final isChemistry = q.contains('chemical reaction') ||
         q.contains('chemical equation') ||
-        q.contains('acids and bases') ||
-        q.contains('hydrochloric acid') ||
-        q.contains('sulfuric acid') ||
-        q.contains('litmus paper') ||
+        q.contains('chemical change') ||
+        q.contains('physical vs chemical') ||
+        q.contains('acid') ||
+        q.contains('base') ||
+        q.contains('alkali') ||
         q.contains('ph scale') ||
+        q.contains('litmus') ||
         q.contains('neutralization') ||
-        q.contains('rusting of iron') ||
-        q.contains('reactivity series') ||
-        q.contains('atomic number') ||
+        q.contains('atom') ||
+        q.contains('molecule') ||
+        q.contains('elements and compounds') ||
         q.contains('periodic table') ||
         q.contains('valency') ||
-        q.contains('calorific value')) {
-      return 'Chemistry';
-    }
+        q.contains('rusting') ||
+        q.contains('corrosion') ||
+        q.contains('combustion') ||
+        q.contains('filtration') ||
+        q.contains('distillation');
 
-    // E. Computer Science check
-    if (q.contains('python') ||
-        q.contains('algorithm') ||
-        q.contains('flowchart') ||
-        q.contains('binary number') ||
-        q.contains('cpu') ||
-        q.contains('ram and rom') ||
-        q.contains('operating system') ||
-        q.contains('programming language') ||
-        q.contains('cyber security')) {
-      return 'Computer Science';
+    if (isChemistry) {
+      return 'Chemistry';
     }
 
     return null;
@@ -246,7 +327,8 @@ class CurriculumGate {
   }
 
   static String _formatSuggestedSubject(String detected, String current) {
-    // If user is on a specific science subject (Physics/Chemistry/Biology) or Mathematics
+    // If user is on Computer Science or Math and question is Biology/Physics/Chemistry,
+    // they can switch to "Science" (or the specific science subject)
     return detected;
   }
 }
