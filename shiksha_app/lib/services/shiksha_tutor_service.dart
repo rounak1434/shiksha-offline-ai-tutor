@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'curriculum_gate.dart';
 
 /// Structured Tutoring Metadata for School Education
 class TutoringMetadata {
@@ -186,21 +187,39 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     String? subject,
     int maxTokens = 250,
   }) {
-    final isMath = (subject ?? '').toLowerCase().contains('math') ||
-        question.contains('+') ||
-        question.contains('-') ||
-        question.contains('*') ||
-        question.contains('/') ||
-        question.contains('=') ||
-        question.toLowerCase().contains('solve');
+    final effectiveGrade = grade ?? 6;
+    final effectiveSubject = (subject != null && subject.trim().isNotEmpty) ? subject.trim() : 'Science';
 
+    // 1. Lightweight local curriculum gate check before calling native LLM
+    final gate = CurriculumGate.evaluate(
+      question: question,
+      grade: effectiveGrade,
+      selectedSubject: effectiveSubject,
+    );
+
+    if (gate.status == GateStatus.subjectMismatch || gate.status == GateStatus.outOfScope) {
+      final controller = StreamController<InferenceChunk>();
+      final boundaryText = gate.message ?? 'This question is outside the selected subject curriculum.';
+      scheduleMicrotask(() {
+        controller.add(InferenceChunk(
+          status: 'completed',
+          delta: boundaryText,
+          accumulated: boundaryText,
+          done: true,
+        ));
+        controller.close();
+      });
+      return controller.stream;
+    }
+
+    final isMath = effectiveSubject.toLowerCase().contains('math');
     final assistantPrefix = isMath ? "Solution:\n" : "";
 
     final controller = StreamController<InferenceChunk>();
     final StringBuffer accumulated = StringBuffer(assistantPrefix);
 
     final effectiveMaxTokens = (maxTokens == 250)
-        ? _calculateDynamicMaxTokens(question, subject)
+        ? _calculateDynamicMaxTokens(question, effectiveSubject)
         : maxTokens;
 
     final modeInstruction = isMath
@@ -208,16 +227,31 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
         : "- For simple factual questions: answer directly in 1 to 3 sentences.\n- For conceptual questions: provide the definition and key explanation in 2 to 3 sentences.";
 
     final systemPrompt =
-        "You are SHIKSHA, a concise offline school AI tutor for Class 1 to 8 students.\n"
-        "Strict rules:\n"
+        "You are SHIKSHA, an offline school tutor for Class 1–8.\n\n"
+        "The student's selected class and subject are authoritative.\n\n"
+        "Selected class: Class $effectiveGrade\n"
+        "Selected subject: $effectiveSubject\n\n"
+        "Answer the current question only if it is appropriate for the selected class and subject.\n\n"
+        "Do not silently switch to another subject.\n"
+        "Do not silently teach a different class level.\n"
+        "If the question clearly belongs to another subject, explain that the student should switch subjects.\n"
+        "If the topic is clearly outside the selected class curriculum, explain that it is outside the selected class scope.\n"
+        "All responses must be in English.\n"
+        "Never output <think>.\n"
+        "Never expose hidden reasoning.\n"
         "- Answer directly and concisely. Do not repeat the question or add conversational filler or intros.\n"
         "- Prefer a complete concise answer over a long incomplete answer. Finish your answer before stopping.\n"
-        "- No emojis. Never output <think> or hidden reasoning tags.\n"
         "$modeInstruction";
+
+    final userPrompt =
+        "/no_think\n"
+        "Student grade: Class $effectiveGrade\n"
+        "Subject: $effectiveSubject\n"
+        "Question: $question";
 
     final serializedPrompt =
         "<|im_start|>system\n$systemPrompt<|im_end|>\n"
-        "<|im_start|>user\n/no_think\n$question<|im_end|>\n"
+        "<|im_start|>user\n$userPrompt<|im_end|>\n"
         "<|im_start|>assistant\n$assistantPrefix";
 
     bool isCompleted = false;
