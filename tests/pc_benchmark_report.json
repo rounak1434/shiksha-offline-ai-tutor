@@ -1,0 +1,43 @@
+{
+  "benchmark_environment": "PC / Local Host (Windows 11, Intel Core i5 / NVIDIA RTX 2050, llama.cpp CPU-x64)",
+  "model_file": "qwen3_k8_tutor_q4_k_m.gguf",
+  "model_size_mb": 378.32,
+  "cold_load_time_ms": 1.55,
+  "avg_prompt_processing_speed_tok_s": 137.83,
+  "avg_generation_speed_tok_s": 14.47,
+  "avg_latency_ms": 8012.26,
+  "queries_evaluated": 3,
+  "detailed_runs": [
+    {
+      "query": "Calculate 7 \u00d7 4.",
+      "grade": 3,
+      "subject": "Mathematics",
+      "latency_ms": 5483.04,
+      "prompt_tok_s": 126.1,
+      "gen_tok_s": 13.1,
+      "completion_tokens": 71,
+      "process_memory_mb": 19.44
+    },
+    {
+      "query": "Solve 3x + 5 = 20 step-by-step.",
+      "grade": 6,
+      "subject": "Mathematics",
+      "latency_ms": 7874.77,
+      "prompt_tok_s": 138.3,
+      "gen_tok_s": 15.5,
+      "completion_tokens": 122,
+      "process_memory_mb": 19.45
+    },
+    {
+      "query": "Calculate the weight of a body with mass 10 kg on Earth.",
+      "grade": 8,
+      "subject": "Science (Physics)",
+      "latency_ms": 10678.98,
+      "prompt_tok_s": 149.1,
+      "gen_tok_s": 14.8,
+      "completion_tokens": 158,
+      "process_memory_mb": 19.45
+    }
+  ],
+  "label": "PC Benchmark (Explicitly labeled: NOT Android Performance)"
+}

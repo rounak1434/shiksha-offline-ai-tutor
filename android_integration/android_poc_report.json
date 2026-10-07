@@ -1,0 +1,9 @@
+{
+  "model_ready": true,
+  "model_size_mb": 378.32,
+  "ram_budget_pass": true,
+  "jni_bridge_ready": true,
+  "kotlin_bridge_ready": true,
+  "flutter_service_ready": true,
+  "overall_poc_status": "PASS"
+}
