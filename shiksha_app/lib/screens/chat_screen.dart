@@ -114,13 +114,18 @@ class _ChatScreenState extends State<ChatScreen> {
       _inputController.clear();
     }
 
+    // Capture the authoritative current Grade and Subject at the exact moment of request dispatch
+    final currentGrade = _selectedGrade;
+    final currentSubject = _selectedSubject;
+    debugPrint('[SHIKSHA] _submitQuestion -> Grade: Class $currentGrade | Subject: $currentSubject | Query: "$text"');
+
     final studentMsg = TutorMessage(
       id: 'msg_std_${DateTime.now().millisecondsSinceEpoch}',
       sender: MessageSender.student,
       content: text,
       timestamp: DateTime.now(),
-      grade: _selectedGrade,
-      subject: _selectedSubject,
+      grade: currentGrade,
+      subject: currentSubject,
     );
 
     final tutorMsgId = 'msg_tut_${DateTime.now().millisecondsSinceEpoch}';
@@ -129,8 +134,8 @@ class _ChatScreenState extends State<ChatScreen> {
       sender: MessageSender.tutor,
       content: '',
       timestamp: DateTime.now(),
-      grade: _selectedGrade,
-      subject: _selectedSubject,
+      grade: currentGrade,
+      subject: currentSubject,
       isGenerating: true,
     );
 
@@ -146,8 +151,8 @@ class _ChatScreenState extends State<ChatScreen> {
       _streamSubscription = widget.tutorService
           .streamGenerate(
         question: text,
-        grade: _selectedGrade,
-        subject: _selectedSubject,
+        grade: currentGrade,
+        subject: currentSubject,
       )
           .listen(
         (chunk) {
@@ -172,8 +177,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   id: tutorMsgId,
                   question: text,
                   answer: chunk.accumulated,
-                  grade: _selectedGrade,
-                  subject: _selectedSubject,
+                  grade: currentGrade,
+                  subject: currentSubject,
                   timestamp: DateTime.now(),
                 ),
               );

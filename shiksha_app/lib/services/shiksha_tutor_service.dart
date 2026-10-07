@@ -190,6 +190,9 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     final effectiveGrade = grade ?? 6;
     final effectiveSubject = (subject != null && subject.trim().isNotEmpty) ? subject.trim() : 'Science';
 
+    // ignore: avoid_print
+    print('[SHIKSHA-SERVICE] streamGenerate: Grade=Class $effectiveGrade, Subject=$effectiveSubject, Question="$question"');
+
     // 1. Lightweight local curriculum gate check before calling native LLM
     final gate = CurriculumGate.evaluate(
       question: question,
