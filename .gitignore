@@ -30,3 +30,7 @@ Screenshot*.png
 Thumbs.db
 .vscode/
 .idea/
+**/local.properties
+**/.dart_tool/
+shiksha_app/build/
+
