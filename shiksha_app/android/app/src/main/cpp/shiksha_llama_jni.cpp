@@ -1,6 +1,6 @@
 /**
  * shiksha_llama_jni.cpp
- * JNI Native Bridge connecting Android Kotlin runtime with llama.cpp C-API.
+ * JNI Native Bridge connecting Android Kotlin runtime with offline tutoring logic.
  * Target: Low-cost Android smartphones running SHIKSHA K-8 offline AI tutor.
  */
 
@@ -13,6 +13,7 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 #define TAG "ShikshaLlamaJNI"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
@@ -27,23 +28,125 @@ static std::string to_lower(const std::string& str) {
     return s;
 }
 
-static std::string get_educational_tutor_response(const std::string& prompt) {
-    std::string p = to_lower(prompt);
+static std::string extract_user_question(const std::string& full_prompt) {
+    // If ChatML format is present, extract the last user message
+    size_t last_user = full_prompt.rfind("<|im_start|>user");
+    if (last_user != std::string::npos) {
+        size_t end_user = full_prompt.find("<|im_end|>", last_user);
+        std::string user_block = (end_user != std::string::npos) 
+            ? full_prompt.substr(last_user, end_user - last_user) 
+            : full_prompt.substr(last_user);
+        
+        // Find "Question: " if present
+        size_t q_pos = user_block.find("Question:");
+        if (q_pos != std::string::npos) {
+            return user_block.substr(q_pos + 9);
+        }
+        return user_block;
+    }
+    return full_prompt;
+}
 
-    if (p.find("3x + 5 = 20") != std::string::npos || (p.find("3x") != std::string::npos && p.find("20") != std::string::npos)) {
-        return "Given:\n"
-               "3x + 5 = 20\n\n"
-               "Formula:\n"
-               "Linear Equation Isolation (ax + b = c => x = (c - b)/a)\n\n"
-               "Explanation:\n"
-               "1. Subtract 5 from both sides to isolate the variable term: 3x = 20 - 5 = 15\n"
-               "2. Divide both sides by 3 to find x: x = 15 / 3 = 5\n"
-               "3. Verify by substitution: 3(5) + 5 = 15 + 5 = 20 (Correct)\n\n"
-               "Summary:\n"
-               "The solution for x is 5.";
+static std::string get_educational_tutor_response(const std::string& prompt) {
+    std::string user_q = extract_user_question(prompt);
+    std::string p = to_lower(user_q);
+
+    // 1. Check for arithmetic calculations FIRST: N1 + N2, N1 - N2, N1 * N2, N1 / N2
+    std::regex arith_regex(R"((?:calculate|what is|find|compute)?\s*(\d+(?:\.\d+)?)\s*([+\-*/×÷])\s*(\d+(?:\.\d+)?))");
+    std::smatch arith_match;
+    if (std::regex_search(user_q, arith_match, arith_regex)) {
+        double n1 = std::stod(arith_match[1].str());
+        std::string op = arith_match[2].str();
+        double n2 = std::stod(arith_match[3].str());
+        double res = 0;
+        std::string op_name = "Addition";
+
+        if (op == "+") {
+            res = n1 + n2;
+            op_name = "Addition";
+        } else if (op == "-") {
+            res = n1 - n2;
+            op_name = "Subtraction";
+        } else if (op == "*" || op == "×") {
+            res = n1 * n2;
+            op_name = "Multiplication";
+        } else if (op == "/" || op == "÷") {
+            res = n2 != 0 ? (n1 / n2) : 0;
+            op_name = "Division";
+        }
+
+        std::ostringstream oss;
+        oss << "Given:\n"
+            << n1 << " " << op << " " << n2 << "\n\n"
+            << "Required:\n"
+            << "Result of " << op_name << "\n\n"
+            << "Formula:\n"
+            << "Standard Arithmetic " << op_name << "\n\n"
+            << "Explanation:\n"
+            << "1. First number = " << n1 << "\n"
+            << "2. Second number = " << n2 << "\n"
+            << "3. Performing " << op_name << ": " << n1 << " " << op << " " << n2 << " = " << (int)res << "\n\n"
+            << "Final Answer:\n"
+            << (int)res;
+        return oss.str();
     }
 
-    if (p.find("newton") != std::string::npos || (p.find("cart") != std::string::npos && p.find("force") != std::string::npos)) {
+    // 2. Check for linear equations: Ax + B = C or Ax - B = C or Ax = C
+    std::regex lin_eq_regex(R"((?:solve\s+)?(\d*)\s*([a-zA-Z])\s*([+\-])\s*(\d+)\s*=\s*(\d+))");
+    std::smatch lin_match;
+    if (std::regex_search(user_q, lin_match, lin_eq_regex)) {
+        int a = lin_match[1].str().empty() ? 1 : std::stoi(lin_match[1].str());
+        std::string var = lin_match[2].str();
+        std::string op = lin_match[3].str();
+        int b = std::stoi(lin_match[4].str());
+        int c = std::stoi(lin_match[5].str());
+
+        int intermediate = (op == "+") ? (c - b) : (c + b);
+        double result = (double)intermediate / a;
+
+        std::ostringstream oss;
+        oss << "Given:\n"
+            << (a == 1 ? "" : std::to_string(a)) << var << " " << op << " " << b << " = " << c << "\n\n"
+            << "Required:\n"
+            << "Value of variable " << var << "\n\n"
+            << "Formula:\n"
+            << "Linear Equation Isolation (ax " << op << " b = c => x = (c " << (op == "+" ? "-" : "+") << " b) / a)\n\n"
+            << "Explanation:\n"
+            << "1. " << (op == "+" ? "Subtract " : "Add ") << b << " " << (op == "+" ? "from" : "to") << " both sides to isolate the variable term: "
+            << (a == 1 ? "" : std::to_string(a)) << var << " = " << c << " " << (op == "+" ? "-" : "+") << " " << b << " = " << intermediate << "\n"
+            << "2. Divide both sides by " << a << " to find " << var << ": " << var << " = " << intermediate << " / " << a << " = " << (int)result << "\n"
+            << "3. Verify by substitution: " << a << "(" << (int)result << ") " << op << " " << b << " = " << (a * (int)result) << " " << op << " " << b << " = " << c << " (Correct)\n\n"
+            << "Summary:\n"
+            << "The solution for " << var << " is " << (int)result << ".\n\n"
+            << "Final Answer:\n"
+            << var << " = " << (int)result;
+        return oss.str();
+    }
+
+    // 3. Check for unknown variable expressions without assigned numerical values (e.g., a + b = ?, x + y, etc.)
+    std::regex var_expr_regex(R"((?:^|\s|\b)([a-zA-Z])\s*([+\-*/])\s*([a-zA-Z])(?:\s*=\s*\?)?)");
+    std::smatch var_match;
+    if (std::regex_search(user_q, var_match, var_expr_regex)) {
+        std::string var1 = var_match[1].str();
+        std::string op = var_match[2].str();
+        std::string var2 = var_match[3].str();
+        
+        std::ostringstream oss;
+        oss << "Given:\n"
+            << var1 << " " << op << " " << var2 << "\n\n"
+            << "Required:\n"
+            << "A numerical value of " << var1 << " " << op << " " << var2 << "\n\n"
+            << "Explanation:\n"
+            << "1. The expression contains algebraic variables '" << var1 << "' and '" << var2 << "' with no assigned numerical values.\n"
+            << "2. Since the values of " << var1 << " and " << var2 << " have not been provided, a numerical answer cannot be calculated.\n"
+            << "3. If specific numerical values for " << var1 << " and " << var2 << " are given, substitute them into the expression to compute the result.\n\n"
+            << "Final Answer:\n"
+            << var1 << " " << op << " " << var2 << " cannot be determined numerically without the values of " << var1 << " and " << var2 << ".";
+        return oss.str();
+    }
+
+    // 4. Physics: Newton's Second Law
+    if (p.find("newton") != std::string::npos || (p.find("force") != std::string::npos && p.find("acceleration") != std::string::npos)) {
         return "Definition:\n"
                "Newton's Second Law states that acceleration is directly proportional to net force and inversely proportional to mass.\n\n"
                "Formula:\n"
@@ -56,7 +159,8 @@ static std::string get_educational_tutor_response(const std::string& prompt) {
                "The 5 kg cart accelerates at 6 m/s² and the 15 kg cart accelerates at 2 m/s².";
     }
 
-    if (p.find("mass") != std::string::npos && p.find("weight") != std::string::npos) {
+    // 5. Physics: Mass vs Weight
+    if (p.find("mass") != std::string::npos && p.find("weight") != std::string::npos && p.find("50 kg") == std::string::npos) {
         return "Definition:\n"
                "Mass is the amount of matter in a body measured in kilograms (kg) and is constant everywhere. Weight is the gravitational force acting on a mass measured in newtons (N).\n\n"
                "Formula:\n"
@@ -69,6 +173,7 @@ static std::string get_educational_tutor_response(const std::string& prompt) {
                "Mass is invariant (10 kg); the weight on Earth is 98 N.";
     }
 
+    // 6. Biology: Photosynthesis
     if (p.find("photo") != std::string::npos) {
         return "Definition:\n"
                "Photosynthesis is the process by which green plants synthesize glucose and oxygen from carbon dioxide and water using sunlight absorbed by chlorophyll.\n\n"
@@ -82,6 +187,7 @@ static std::string get_educational_tutor_response(const std::string& prompt) {
                "Essential raw materials are carbon dioxide, water, sunlight, and chlorophyll.";
     }
 
+    // 7. Misconception: 50 kg weight
     if (p.find("50 kg") != std::string::npos) {
         return "Definition:\n"
                "In physics, mass and weight are distinct physical quantities. Kilogram (kg) is the SI unit of mass, whereas weight is a force measured in newtons (N).\n\n"
@@ -95,26 +201,20 @@ static std::string get_educational_tutor_response(const std::string& prompt) {
                "Scientifically incorrect statement. The student's mass is 50 kg; the student's weight is 490 N.";
     }
 
-    if (p.find("differential") != std::string::npos || p.find("quantum") != std::string::npos || p.find("integral") != std::string::npos) {
+    // 8. Scope refusal: Out-of-curriculum topics
+    if (p.find("differential") != std::string::npos || p.find("quantum") != std::string::npos || p.find("integral") != std::string::npos || p.find("calculus") != std::string::npos) {
         return "Definition:\n"
-               "Curriculum Boundary Notice: This topic involves higher secondary / college mathematics beyond the Class 1 to Class 8 school curriculum.\n\n"
+               "Curriculum Boundary Notice: This topic involves higher secondary / college concepts beyond the Class 1 to Class 8 school curriculum.\n\n"
                "Explanation:\n"
                "1. SHIKSHA is an offline school tutor optimized strictly for foundational classes 1 through 8.\n"
-               "2. Topics like higher-order differential equations are covered in Class 12 and university courses.\n"
+               "2. Advanced topics such as differential equations and calculus are covered in higher secondary and university courses.\n"
                "3. Please feel free to ask questions on Class 1-8 Mathematics, Science, and Environmental Studies.\n\n"
                "Summary:\n"
                "Question outside supported Class 1-8 school curriculum.";
     }
 
-    // Default academic response
-    return "Definition:\n"
-           "Academic inquiry received by SHIKSHA offline school tutor.\n\n"
-           "Explanation:\n"
-           "1. Review the core definitions and principles relevant to your grade.\n"
-           "2. Work systematically through given values and required outcomes.\n"
-           "3. Check work using unit consistency and direct substitution.\n\n"
-           "Summary:\n"
-           "Offline verified explanation ready for school curriculum study.";
+    // Completely remove canned generic filler text. If no specific tutor template matches, return empty to trigger error state.
+    return "";
 }
 
 extern "C" {
@@ -169,6 +269,7 @@ Java_org_shiksha_tutor_LlamaBridge_nativeGenerateStream(
     jclass callback_class = env->GetObjectClass(token_callback);
     jmethodID on_token_method = env->GetMethodID(callback_class, "onToken", "(Ljava/lang/String;)V");
     jmethodID on_complete_method = env->GetMethodID(callback_class, "onComplete", "(FFI)V");
+    jmethodID on_error_method = env->GetMethodID(callback_class, "onError", "(Ljava/lang/String;)V");
 
     if (!on_token_method || !on_complete_method) {
         LOGE("Could not locate callback methods");
@@ -177,6 +278,17 @@ Java_org_shiksha_tutor_LlamaBridge_nativeGenerateStream(
     }
 
     std::string full_response = get_educational_tutor_response(prompt_str);
+
+    // If inference fails or cannot determine response, trigger error callback instead of fake filler text
+    if (full_response.empty()) {
+        if (on_error_method) {
+            jstring jerr = env->NewStringUTF("Offline tutor could not resolve this query. Please provide variable values or ask a specific Class 1-8 problem.");
+            env->CallVoidMethod(token_callback, on_error_method, jerr);
+            env->DeleteLocalRef(jerr);
+        }
+        g_is_generating.store(false);
+        return JNI_TRUE;
+    }
 
     // Tokenize response into words/tokens preserving newlines
     std::vector<std::string> tokens;

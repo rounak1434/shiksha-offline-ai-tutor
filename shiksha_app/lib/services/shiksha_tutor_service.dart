@@ -152,9 +152,26 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     final controller = StreamController<InferenceChunk>();
     final StringBuffer accumulated = StringBuffer();
 
+    const systemPrompt =
+        "You are SHIKSHA, an offline school AI tutor for Class 1 to 8 students.\n"
+        "Follow these instructions strictly:\n"
+        "1. Answer the student's actual question directly and accurately.\n"
+        "2. Never return generic educational filler or invent missing values.\n"
+        "3. If given an algebraic expression with unknown variables where no values are provided, "
+        "explicitly state that a numerical answer cannot be calculated without the values of the variables.\n"
+        "4. For mathematical calculations, calculate step-by-step when numbers are given.\n"
+        "5. Use structured sections (Given, Required, Formula, Explanation, Final Answer) when appropriate.\n"
+        "6. Stay strictly within the Class 1–8 school curriculum.\n"
+        "7. Do not use emojis. Never output <think> or hidden reasoning traces.";
+
+    final serializedPrompt =
+        "<|im_start|>system\n$systemPrompt<|im_end|>\n"
+        "<|im_start|>user\nStudent grade: Class $grade\nSubject: $subject\nQuestion: $question<|im_end|>\n"
+        "<|im_start|>assistant\n";
+
     // Start native stream
     _methodChannel.invokeMethod('generateStream', {
-      'prompt': 'Student grade: Class $grade\nSubject: $subject\nQuestion: $question',
+      'prompt': serializedPrompt,
       'max_tokens': maxTokens,
       'temperature': 0.0,
     }).catchError((err) {

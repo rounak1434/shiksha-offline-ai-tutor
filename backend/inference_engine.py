@@ -29,6 +29,19 @@ from backend.response_contract import (
 DEFAULT_MODEL_PATH = r"C:\Rounak\RVSHACK\output\qwen3_k8_tutor_q4_k_m.gguf"
 DEFAULT_LLAMA_CLI = r"C:\Rounak\RVSHACK\llama.cpp\build_bin\llama-cli.exe"
 
+SYSTEM_PROMPT = (
+    "You are SHIKSHA, an offline school AI tutor for Class 1 to 8 students.\n"
+    "Follow these instructions strictly:\n"
+    "1. Answer the student's actual question directly and accurately.\n"
+    "2. Never return generic educational filler or invent missing values.\n"
+    "3. If given an algebraic expression with unknown variables where no values are provided, "
+    "explicitly state that a numerical answer cannot be calculated without the values of the variables.\n"
+    "4. For mathematical calculations, calculate step-by-step when numbers are given.\n"
+    "5. Use structured sections (Given, Required, Formula, Explanation, Final Answer) when appropriate.\n"
+    "6. Stay strictly within the Class 1–8 school curriculum.\n"
+    "7. Do not use emojis. Never output <think> or hidden reasoning traces."
+)
+
 class ShikshaInferenceEngine:
     def __init__(self, model_path: str = DEFAULT_MODEL_PATH, llama_cli_path: str = DEFAULT_LLAMA_CLI):
         self.model_path = os.path.abspath(model_path)
@@ -117,8 +130,12 @@ class ShikshaInferenceEngine:
         else:
             formatted_q = question
             
-        # Clean ChatML template without <think> tags
-        prompt = f"<|im_start|>user\n{formatted_q}<|im_end|>\n<|im_start|>assistant\n"
+        # Clean ChatML template with strengthened educational system prompt
+        prompt = (
+            f"<|im_start|>system\n{SYSTEM_PROMPT}<|im_end|>\n"
+            f"<|im_start|>user\n{formatted_q}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
         return prompt
 
     def stream_generate(
@@ -154,6 +171,7 @@ class ShikshaInferenceEngine:
         try:
             proc = subprocess.Popen(
                 cmd,
+                stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -210,6 +228,10 @@ class ShikshaInferenceEngine:
                     clean_chunk = clean_chunk.split("<|im_start|>assistant")[-1]
                 if "<|im_end|>" in clean_chunk:
                     clean_chunk = clean_chunk.split("<|im_end|>")[0]
+                if "</think>" in clean_chunk:
+                    clean_chunk = clean_chunk.split("</think>")[-1]
+                if "<think>" in clean_chunk:
+                    clean_chunk = clean_chunk.split("<think>")[0]
                     
                 if clean_chunk:
                     accumulated_text += clean_chunk

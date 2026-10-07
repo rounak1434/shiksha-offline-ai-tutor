@@ -165,5 +165,63 @@ class TestShikshaBackend(unittest.TestCase):
         self.assertEqual(meta.final_answer, "5")
         self.assertTrue(len(meta.steps) >= 2)
 
+    def test_10_unknown_variable_expression(self):
+        """Regression test: a + b = ? must acknowledge missing values without generic filler or think tags."""
+        resp = self.engine.generate(
+            question="a + b = ?",
+            grade=6,
+            subject="Mathematics",
+            max_tokens=100
+        )
+        self.assertEqual(resp.status, "completed")
+        content = resp.content.lower()
+        # Verify no think tags
+        self.assertNotIn("<think>", resp.content)
+        self.assertNotIn("</think>", resp.content)
+        # Verify no generic mock filler
+        self.assertNotIn("academic inquiry received", content)
+        self.assertNotIn("review the core definitions", content)
+        # Semantic check: acknowledges variables or missing values or cannot determine numerical result
+        self.assertTrue(
+            "value" in content or "variable" in content or "cannot" in content or "determined" in content or "provided" in content,
+            f"Expected explanation of missing values/variables, got: {resp.content}"
+        )
+
+    def test_11_arithmetic_evaluation(self):
+        """Regression test: 2 + 3 yields numerical answer 5."""
+        resp = self.engine.generate(
+            question="What is 2 + 3?",
+            grade=1,
+            subject="Mathematics",
+            max_tokens=60
+        )
+        self.assertEqual(resp.status, "completed")
+        self.assertIn("5", resp.content)
+        self.assertNotIn("<think>", resp.content)
+
+    def test_12_linear_equation_solution(self):
+        """Regression test: Solve 2x + 7 = 15 yields solution x = 4."""
+        resp = self.engine.generate(
+            question="Solve 2x + 7 = 15",
+            grade=6,
+            subject="Mathematics",
+            max_tokens=100
+        )
+        self.assertEqual(resp.status, "completed")
+        self.assertIn("4", resp.content)
+        self.assertNotIn("<think>", resp.content)
+
+    def test_13_newtons_second_law(self):
+        """Regression test: Explain Newton's Second Law yields F = ma."""
+        resp = self.engine.generate(
+            question="Explain Newton's Second Law.",
+            grade=8,
+            subject="Science (Physics)",
+            max_tokens=150
+        )
+        self.assertEqual(resp.status, "completed")
+        self.assertTrue("f = m" in resp.content.lower() or "f = ma" in resp.content.lower() or "force" in resp.content.lower())
+        self.assertNotIn("<think>", resp.content)
+
 if __name__ == "__main__":
     unittest.main()
