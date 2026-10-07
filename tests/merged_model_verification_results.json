@@ -1,0 +1,47 @@
+[
+  {
+    "id": "class3_math",
+    "prompt": "Student grade: Class 3\nSubject: Mathematics\nQuestion: Calculate 7 \u00d7 4. What does multiplication mean?",
+    "response": "Definition:\nMultiplication is the operation that represents combining equal groups of objects to form a single entity.\n\nExplanation:\n7 \u00d7 4 = 28\nThis means 28 objects are grouped into 7 sets of 4 objects each.\n\nSummary:\n7 multiplied by 4 equals 28. The operation emphasizes grouping equal quantities to form a single item.",
+    "tokens": 74,
+    "time_sec": 5.85,
+    "tokens_per_sec": 12.65,
+    "has_think": false
+  },
+  {
+    "id": "class6_math",
+    "prompt": "Student grade: Class 6\nSubject: Mathematics\nQuestion: Solve 3x + 5 = 20 step-by-step. Show all steps.",
+    "response": "Given equation: 3x + 5 = 20\n\nStep 1: Subtract 5 from both sides to isolate the variable term:\n3x = 20 - 5\n3x = 15\n\nStep 2: Divide both sides by 3:\nx = 15 / 3\nx = 5\n\nVerification:\nOriginal equation: 3(5) + 5 = 15 + 5 = 20. Left side = 20, Right side = 20. Equation is satisfied.\n\nFinal Answer: x = 5",
+    "tokens": 123,
+    "time_sec": 9.19,
+    "tokens_per_sec": 13.39,
+    "has_think": false
+  },
+  {
+    "id": "class8_physics",
+    "prompt": "Student grade: Class 8\nSubject: Science (Physics)\nQuestion: A constant 30 N force pushes a 5 kg cart and a 15 kg cart. Which cart accelerates faster? Calculate both accelerations.",
+    "response": "Given:\nMass of first cart, m\u2081 = 5 kg\nMass of second cart, m\u2082 = 15 kg\nForce, F = 30 N\n\nRequired:\nAcceleration of both carts\n\nFormula (Newton's second law):\na = Fr/m\n\nCalculation:\nFor cart 1: a\u2081 = (30 \u00d7 5)/5 = 30 m/s\u00b2\nFor cart 2: a\u2082 = (30 \u00d7 15)/15 = 30 m/s\u00b2\n\nBoth cart accelerates at 30 m/s\u00b2.\n\nState:\nBoth cart accelerates at 30 m/s\u00b2.",
+    "tokens": 135,
+    "time_sec": 19.85,
+    "tokens_per_sec": 6.8,
+    "has_think": false
+  },
+  {
+    "id": "class8_misconception",
+    "prompt": "Student grade: Class 8\nSubject: Science (Physics)\nQuestion: A student says: my weight is 50 kg. Is this scientifically correct?",
+    "response": "Definition:\nWeight is the gravitational force exerted perpendicularly onto an object's surface.\n\nCalculation (Modern Definition):\nWeight (W) = Mass (m) \u00d7 Acceleration due to gravity (g)\n\nDefinition (Classical Definition):\nThe downward force of Earth's gravity that balances the object's supporting support structures.\n\nCalculation (Classical Definition):\nWeight (W) = mg\n\nSummary:\nScientifically, weight is not defined as a quantity but as the force of gravity. Therefore, the statement is scientifically incorrect.",
+    "tokens": 107,
+    "time_sec": 18.31,
+    "tokens_per_sec": 5.84,
+    "has_think": false
+  },
+  {
+    "id": "class8_scope_refusal",
+    "prompt": "Student grade: Class 8\nSubject: Mathematics\nQuestion: Can you solve this second-order differential equation y'' + 4y = 0?",
+    "response": "Given:\nSecond-order differential equation y'' + 4y = 0\n\nRequired:\nGeneral solution of the differential equation\n\nCalculation:\nTo solve the homogeneous linear differential equation y'' + 4y = 0, we follow these steps:\n\n1. Find the characteristic equation of the corresponding homogeneous linear differential operator:\nr\u00b2 + 4r + 0 = 0\n\n2. Solve the characteristic equation:\nr\u00b2 + 4r + 0 = 0\nr(r + 4) = 0\nr = 0 or r = -4\n\n3. Write the general solution in terms of exponential functions:\ny(t) = (C\u2081 + C\u2082t) e^{-4t}\n\nFinal Answer:\ny(t) = (C\u2081 + C\u2082t) e^{-4t}",
+    "tokens": 167,
+    "time_sec": 28.2,
+    "tokens_per_sec": 5.92,
+    "has_think": false
+  }
+]
