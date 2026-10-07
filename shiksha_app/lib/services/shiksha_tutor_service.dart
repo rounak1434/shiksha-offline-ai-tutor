@@ -142,6 +142,43 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     }
   }
 
+  int _calculateDynamicMaxTokens(String question, String? subject) {
+    final q = question.trim().toLowerCase();
+    final sub = (subject ?? '').toLowerCase();
+
+    // Step-by-step math or numerical problem solving
+    final isMath = sub.contains('math') ||
+        q.contains('solve') ||
+        q.contains('calculate') ||
+        q.contains('equation') ||
+        q.contains('+') ||
+        q.contains('-') ||
+        q.contains('*') ||
+        q.contains('/') ||
+        q.contains('=');
+
+    if (isMath) {
+      return 160; // Step-by-step math ceiling
+    }
+
+    // Conceptual explanation questions
+    final isConceptual = q.startsWith('explain') ||
+        q.startsWith('why') ||
+        q.startsWith('how does') ||
+        q.contains('describe') ||
+        q.contains('difference between') ||
+        q.contains('what is photosynthesis') ||
+        q.contains('photosynthesis') ||
+        q.contains('process of');
+
+    if (isConceptual) {
+      return 128; // Normal educational explanation ceiling
+    }
+
+    // Simple factual questions (e.g. bones, Newton's laws, arithmetic, etc.)
+    return 96; // Simple / short conceptual ceiling
+  }
+
   @override
   Stream<InferenceChunk> streamGenerate({
     required String question,
@@ -149,31 +186,46 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     String? subject,
     int maxTokens = 250,
   }) {
-    final controller = StreamController<InferenceChunk>();
-    final StringBuffer accumulated = StringBuffer();
+    final isMath = (subject ?? '').toLowerCase().contains('math') ||
+        question.contains('+') ||
+        question.contains('-') ||
+        question.contains('*') ||
+        question.contains('/') ||
+        question.contains('=') ||
+        question.toLowerCase().contains('solve');
 
-    const systemPrompt =
-        "You are SHIKSHA, an offline school AI tutor for Class 1 to 8 students.\n"
-        "Instructions:\n"
-        "1. Answer the student's question directly using clear, age-appropriate school explanations.\n"
-        "2. For mathematics problems, show clear step-by-step working and the final answer.\n"
-        "3. For science, explain concepts clearly with formulas, principles, and units where applicable.\n"
-        "4. If information or values are missing from the question (e.g. incomplete expressions like '2x - 8 = ?'), explicitly state what is missing and ask for the value instead of inventing numbers.\n"
-        "5. If the question is outside Class 1 to 8 school curriculum (e.g. quantum field theory, advanced calculus), give a brief polite educational boundary response and suggest a related school topic.\n"
-        "6. For casual non-academic questions (e.g. greetings or tutor name), respond briefly and naturally.\n"
-        "7. Do not use emojis. Never output <think> or hidden reasoning tags.";
+    final assistantPrefix = isMath ? "Solution:\n" : "";
+
+    final controller = StreamController<InferenceChunk>();
+    final StringBuffer accumulated = StringBuffer(assistantPrefix);
+
+    final effectiveMaxTokens = (maxTokens == 250)
+        ? _calculateDynamicMaxTokens(question, subject)
+        : maxTokens;
+
+    final modeInstruction = isMath
+        ? "- For mathematics: provide clear, concise step-by-step working and the final answer."
+        : "- For simple factual questions: answer directly in 1 to 3 sentences.\n- For conceptual questions: provide the definition and key explanation in 2 to 3 sentences.";
+
+    final systemPrompt =
+        "You are SHIKSHA, a concise offline school AI tutor for Class 1 to 8 students.\n"
+        "Strict rules:\n"
+        "- Answer directly and concisely. Do not repeat the question or add conversational filler or intros.\n"
+        "- Prefer a complete concise answer over a long incomplete answer. Finish your answer before stopping.\n"
+        "- No emojis. Never output <think> or hidden reasoning tags.\n"
+        "$modeInstruction";
 
     final serializedPrompt =
         "<|im_start|>system\n$systemPrompt<|im_end|>\n"
-        "<|im_start|>user\nStudent grade: Class $grade\nSubject: $subject\nQuestion: $question<|im_end|>\n"
-        "<|im_start|>assistant\n";
+        "<|im_start|>user\n/no_think\n$question<|im_end|>\n"
+        "<|im_start|>assistant\n$assistantPrefix";
 
     bool isCompleted = false;
 
     // Start native stream
     _methodChannel.invokeMethod('generateStream', {
       'prompt': serializedPrompt,
-      'max_tokens': maxTokens,
+      'max_tokens': effectiveMaxTokens,
       'temperature': 0.0,
     }).catchError((err) {
       if (!isCompleted) {

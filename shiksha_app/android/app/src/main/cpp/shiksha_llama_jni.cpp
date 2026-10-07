@@ -314,6 +314,9 @@ Java_org_shiksha_tutor_LlamaBridge_nativeGenerateStream(
     auto sparams = llama_sampler_chain_default_params();
     sparams.no_perf = true;
     llama_sampler* smpl = llama_sampler_chain_init(sparams);
+
+
+
     if (temperature > 0.05f) {
         llama_sampler_chain_add(smpl, llama_sampler_init_temp(temperature));
         llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
@@ -398,7 +401,7 @@ Java_org_shiksha_tutor_LlamaBridge_nativeGenerateStream(
                 if (piece.find("</think>") != std::string::npos) {
                     in_think_block = false;
                 }
-            } else if (piece != "<|im_end|>" && piece != "<|endoftext|>") {
+            } else if (piece != "<|im_end|>" && piece != "<|endoftext|>" && piece.find("</think>") == std::string::npos) {
                 utf8_accumulator += piece;
                 std::string to_emit = extract_complete_utf8(utf8_accumulator);
                 if (!to_emit.empty()) {
