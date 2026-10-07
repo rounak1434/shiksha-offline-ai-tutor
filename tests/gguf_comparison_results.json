@@ -1,0 +1,128 @@
+{
+  "f16_model": "C:\\Rounak\\RVSHACK\\output\\qwen3_k8_tutor_f16.gguf",
+  "q4_model": "C:\\Rounak\\RVSHACK\\output\\qwen3_k8_tutor_q4_k_m.gguf",
+  "f16_size_bytes": 1198178208,
+  "q4_size_bytes": 396700576,
+  "comparisons": [
+    {
+      "id": "algebra",
+      "prompt": "Student grade: Class 6\nSubject: Mathematics\nQuestion: Solve 3x + 5 = 20 step-by-step. Show all steps.",
+      "f16": {
+        "answer": "Given equation: 3x + 5 = 20\n\nStep 1: Subtract 5 from both sides to isolate the variable term:\n3x = 20 - 5\n3x = 15\n\nStep 2: Divide both sides by 3:\nx = 15 / 3\nx = 5\n\nFinal answer: x = 5\n</think>\n\nGiven equation: 3x + 5 = 20\n\nStep 1: Subtract 5 from both sides:\n3x = 15\n\nStep 2: Divide both sides by 3:\nx = 5\n\nFinal answer: $ x = 5 $",
+        "speed_tok_s": 5.2,
+        "prompt_tok_s": 63.7,
+        "wall_time_sec": 32.08,
+        "passed": true,
+        "has_think": true
+      },
+      "q4_k_m": {
+        "answer": "Given: 3x + 5 = 20\nRequired: Value of variable x\nMethod:\n1. Subtract 5 from both sides to isolate 3x: 3x = 20 - 5 = 15\n2. Divide both sides by 3: x = 15 / 3 = 5\nFinal Answer: 5\nStep 2: 3(5) + 5 = 20",
+        "speed_tok_s": 14.4,
+        "prompt_tok_s": 124.8,
+        "wall_time_sec": 9.74,
+        "passed": true,
+        "has_think": false
+      }
+    },
+    {
+      "id": "newtons_law",
+      "prompt": "Student grade: Class 8\nSubject: Science (Physics)\nQuestion: A constant 30 N force pushes a 5 kg cart and a 15 kg cart. Which cart accelerates faster? Calculate both accelerations.",
+      "f16": {
+        "answer": "Given:\nMass of first cart, m₁ = 5 kg\nMass of second cart, m₂ = 15 kg\nForce, F = 30 N\n\nRequired:\nAcceleration of both carts\n\nFormula:\na = Fr/m\n\nCalculation:\nFor cart 1: a₁ = (30 × 5)/5 = 30 m/s²\nFor cart 2: a₂ = (30 × 15)/15 = 30 m/s²\n\nBoth cart accelerates at 30 m/s².\n\nState:\nBoth cart accelerates at 30 m/s².",
+        "speed_tok_s": 6.6,
+        "prompt_tok_s": 88.9,
+        "wall_time_sec": 22.67,
+        "passed": false,
+        "has_think": false
+      },
+      "q4_k_m": {
+        "answer": "Given:\nMass (m₁) = 5 kg\nForce (F₁) = 30 N\nMass (m₂) = 15 kg\nForce (F₂) = 30 N\n\nRequired:\nAcceleration (a) of each cart\n\nFormula:\na = F / m\n\nCalculation:\nFor cart 1: a₁ = 30 / 5 = 6 m/s²\nFor cart 2: a₂ = 30 / 15 = 2 m/s²\n\nFinal Answer:\nBoth 6 m/s² and 2 m/s², respectively.",
+        "speed_tok_s": 15.8,
+        "prompt_tok_s": 157.5,
+        "wall_time_sec": 11.14,
+        "passed": true,
+        "has_think": false
+      }
+    },
+    {
+      "id": "mass_vs_weight",
+      "prompt": "Student grade: Class 8\nSubject: Science (Physics)\nQuestion: Calculate the weight of a body with mass 10 kg on Earth (g = 9.8 m/s²). Explain the difference between mass and weight.",
+      "f16": {
+        "answer": "Definition:\nMass is invariant within a reference frame and remains 10 kg.\nWeight is the gravitational force exerted on a body and is calculated as W = mg.\n\nFormula:\nW = mg\n\nSubstitution:\nW = 10 kg × 9.8 m/s² = 98 N\n\nExplanation of Mass and Weight:\nMass remains 10 kg on Earth. Weight is the measured force of gravity that 98 N is exerted on the body.\nThe unit of weight is Newton (N).\n\nFinal Answer:\nWeight = 98 N",
+        "speed_tok_s": 6.4,
+        "prompt_tok_s": 92.0,
+        "wall_time_sec": 21.49,
+        "passed": true,
+        "has_think": false
+      },
+      "q4_k_m": {
+        "answer": "Definition:\nMass is an intrinsic, scalar quantity invariant across different mediums. It remains constant in kilograms (kg).\nWeight is a resultant force measured in newtons (N) and depends on the gravitational acceleration (g) required to balance the mass.\n\nCalculation:\nWeight (N) = Mass (kg) × g (m/s²) = 10 × 9.8 = 98 N\n\nExplanation:\nMass and weight are two but distinct physical quantities. They are directly proportional in the same dimension (kg × m/s²), indicating mass is invariant in medium while weight varies in medium.\n\nFinal Answer:\nWeight = 98 N; Mass is invariant in medium; Weight varies in medium.",
+        "speed_tok_s": 12.6,
+        "prompt_tok_s": 220.1,
+        "wall_time_sec": 13.9,
+        "passed": true,
+        "has_think": false
+      }
+    },
+    {
+      "id": "conceptual_science",
+      "prompt": "Student grade: Class 7\nSubject: Science (Biology)\nQuestion: What is photosynthesis and what are the essential raw materials required?",
+      "f16": {
+        "answer": "Definition:\nPhotosynthesis is the process by which green plants, algae, and some bacteria convert white light (solar radiation) into chemical energy stored in the form of glucose.\n\nExplanation of Key Terms:\n1. Raw Materials (Inputs):\n- Carbon dioxide (CO₂): from the air.\n- Water (H₂O): from the soil or liquid.\n2. Products (Outputs):\n- Glucose (C₆H₁₂O₆): plants use to grow and fuel organisms.\n- Oxygen (O₂): released back into the atmosphere.\n\nSummary:\nPhotosynthesis requires CO₂ and H₂O to produce glucose and oxygen.",
+        "speed_tok_s": 6.6,
+        "prompt_tok_s": 44.3,
+        "wall_time_sec": 23.52,
+        "passed": true,
+        "has_think": false
+      },
+      "q4_k_m": {
+        "answer": "Definition:\nPhotosynthesis is the biological process by which autotrophic organisms (plants, algae, and cyanobacteria) convert sunlight, water, and carbon dioxide into chemical energy (glucose) using chlorophyll.\n\nKey Components (Raw Materials):\n1. Sunlight: Source of light energy.\n2. Water (H2O): Chemical solvent containing oxygen.\n3. Carbon dioxide (CO₂): Chemical carbon molecule.\n\nSummary:\nPhotosynthesis synthesizes glucose from sunlight, water, and carbon dioxide using chlorophyll to convert these raw materials into stored energy biomass.",
+        "speed_tok_s": 16.1,
+        "prompt_tok_s": 237.4,
+        "wall_time_sec": 9.35,
+        "passed": true,
+        "has_think": false
+      }
+    },
+    {
+      "id": "misconception",
+      "prompt": "Student grade: Class 8\nSubject: Science (Physics)\nQuestion: A student says: my weight is 50 kg. Is this scientifically correct?",
+      "f16": {
+        "answer": "The scientific explanation is as follows:\n\nWeight is the gravitational force exerted on an object and is calculated by the formula $ W = mg $, where $ W $ is weight, $ m $ is mass, and $ g $ is the acceleration due to gravity.\n\nIn Class 8 physics, the key principle is that weight must be measured in newtons (N) and is dependent on environmental factors such as elevation and atmospheric pressure. Therefore, the student's statement of 50 kg is scientifically incorrect because weight is not measured in mass but in a gravitational force field.\n\nFinal Answer: Scientifically incorrect. Weight must be measured in newtons, not kilograms.",
+        "speed_tok_s": 6.0,
+        "prompt_tok_s": 100.8,
+        "wall_time_sec": 25.24,
+        "passed": true,
+        "has_think": false
+      },
+      "q4_k_m": {
+        "answer": "Scientific Explanation:\nScientifically, weight is the gravitational force exerted on an object's mass. The mass of an object is determined by its atomic weight (grams), not its volume. Therefore, the volume of water required to obtain 50 grams is 0.050 liters (or 50 cm³). \n\nIn summary, the student's statement is scientifically correct.",
+        "speed_tok_s": 20.2,
+        "prompt_tok_s": 157.4,
+        "wall_time_sec": 6.33,
+        "passed": true,
+        "has_think": false
+      }
+    },
+    {
+      "id": "curriculum_refusal",
+      "prompt": "Student grade: Class 8\nSubject: Mathematics\nQuestion: Can you solve this second-order differential equation y'' + 4y = 0?",
+      "f16": {
+        "answer": "Given: y'' + 4y = 0\nRequired: General solution\n\nMethod:\nFor linear homogeneous differential equations with constant coefficients, the characteristic equation is r² + 4r = 0. Factorizing: r(r + 4) = 0. Roots: r = 0 and r = -4\n\nSolution:\nThe general solution is y(t) = (C₁ + C₂t)e^{-4t}\n\nFinal Answer:\ny(t) = (C₁ + C₂t)e^{-4t}",
+        "speed_tok_s": 6.4,
+        "prompt_tok_s": 80.5,
+        "wall_time_sec": 19.85,
+        "passed": true,
+        "has_think": false
+      },
+      "q4_k_m": {
+        "answer": "The requested problem is about solving a second-order linear differential equation. Let's break it down step by step.\n\n### 1. Standard Form of a Second-Order Linear Differential Equation\nThe general second-order linear nonhomogeneous differential equation is:\n$$\n\\frac{d^2 y}{dt^2} + b \\frac{dy}{dt} + c y = d\n$$\nIn our case, the nonhomogeneous term $ d = 0 $, so the equation simplifies to:\n$$\n\\frac{d^2 y}{dt^2} + b \\frac{dy}{dt} + c y = 0\n$$\n\n### 2. Identify Constants\nFrom the differential equation:\n$$\n\\frac{d^2 y}{dt^2} + 4 \\frac{dy}{dt} + 1 y = 0\n$$",
+        "speed_tok_s": 14.7,
+        "prompt_tok_s": 64.0,
+        "wall_time_sec": 15.47,
+        "passed": true,
+        "has_think": false
+      }
+    }
+  ]
+}
