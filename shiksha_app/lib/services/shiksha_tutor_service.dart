@@ -134,9 +134,9 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     } catch (_) {
       return {
         'engine': 'llama.cpp Native Bridge',
-        'model': 'qwen3_k8_tutor_q4_k_m.gguf',
+        'model': 'qwen3_base_q4_k_m.gguf',
         'format': 'GGUF Q4_K_M',
-        'size_mb': 378.32,
+        'size_mb': 461.79,
         'offline': true,
       };
     }

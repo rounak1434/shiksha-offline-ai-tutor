@@ -42,6 +42,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    // Trigger offline model readiness / load on launch
+    widget.tutorService.loadModel('');
     // Default welcome state
     _addInitialGreeting();
   }
@@ -794,7 +796,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 border: Border.all(color: const Color(0xFF1E293B)),
               ),
               child: Text(
-                '${message.metrics!.tokensPerSecond.toStringAsFixed(1)} tok/s • ${message.metrics!.completionTokens} tokens • 378 MB local GGUF',
+                '${message.metrics!.tokensPerSecond.toStringAsFixed(1)} tok/s • ${message.metrics!.completionTokens} tokens • 462 MB local GGUF',
                 style: const TextStyle(
                   color: Color(0xFF64748B),
                   fontSize: 11,
