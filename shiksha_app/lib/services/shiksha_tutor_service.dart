@@ -154,20 +154,21 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
 
     const systemPrompt =
         "You are SHIKSHA, an offline school AI tutor for Class 1 to 8 students.\n"
-        "Follow these instructions strictly:\n"
-        "1. Answer the student's actual question directly and accurately.\n"
-        "2. Never return generic educational filler or invent missing values.\n"
-        "3. If given an algebraic expression with unknown variables where no values are provided, "
-        "explicitly state that a numerical answer cannot be calculated without the values of the variables.\n"
-        "4. For mathematical calculations, calculate step-by-step when numbers are given.\n"
-        "5. Use structured sections (Given, Required, Formula, Explanation, Final Answer) when appropriate.\n"
-        "6. Stay strictly within the Class 1–8 school curriculum.\n"
-        "7. Do not use emojis. Never output <think> or hidden reasoning traces.";
+        "Instructions:\n"
+        "1. Answer the student's question directly using clear, age-appropriate school explanations.\n"
+        "2. For mathematics problems, show clear step-by-step working and the final answer.\n"
+        "3. For science, explain concepts clearly with formulas, principles, and units where applicable.\n"
+        "4. If information or values are missing from the question (e.g. incomplete expressions like '2x - 8 = ?'), explicitly state what is missing and ask for the value instead of inventing numbers.\n"
+        "5. If the question is outside Class 1 to 8 school curriculum (e.g. quantum field theory, advanced calculus), give a brief polite educational boundary response and suggest a related school topic.\n"
+        "6. For casual non-academic questions (e.g. greetings or tutor name), respond briefly and naturally.\n"
+        "7. Do not use emojis. Never output <think> or hidden reasoning tags.";
 
     final serializedPrompt =
         "<|im_start|>system\n$systemPrompt<|im_end|>\n"
         "<|im_start|>user\nStudent grade: Class $grade\nSubject: $subject\nQuestion: $question<|im_end|>\n"
         "<|im_start|>assistant\n";
+
+    bool isCompleted = false;
 
     // Start native stream
     _methodChannel.invokeMethod('generateStream', {
@@ -175,11 +176,15 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
       'max_tokens': maxTokens,
       'temperature': 0.0,
     }).catchError((err) {
-      controller.addError(err);
-      controller.close();
+      if (!isCompleted) {
+        isCompleted = true;
+        controller.addError(err);
+        controller.close();
+      }
     });
 
-    final subscription = _eventChannel.receiveBroadcastStream().listen(
+    late final StreamSubscription subscription;
+    subscription = _eventChannel.receiveBroadcastStream().listen(
       (dynamic event) {
         if (event is Map) {
           final delta = event['delta'] as String? ?? '';
@@ -201,19 +206,28 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
           ));
 
           if (done) {
+            isCompleted = true;
+            subscription.cancel();
             controller.close();
           }
         }
       },
       onError: (dynamic error) {
-        controller.addError(error);
-        controller.close();
+        if (!isCompleted) {
+          isCompleted = true;
+          subscription.cancel();
+          controller.addError(error);
+          controller.close();
+        }
       },
     );
 
     controller.onCancel = () {
       subscription.cancel();
-      stopGeneration();
+      // Crucial: Never cancel generation if request already completed naturally
+      if (!isCompleted) {
+        stopGeneration();
+      }
     };
 
     return controller.stream;

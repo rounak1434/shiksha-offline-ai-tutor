@@ -19,6 +19,7 @@ class ShikshaPlatformChannel(
     
     private var streamEventSink: EventChannel.EventSink? = null
     private val scope = CoroutineScope(Dispatchers.IO)
+    private var activeGenerationJob: kotlinx.coroutines.Job? = null
 
     init {
         methodChannel.setMethodCallHandler(this)
@@ -28,8 +29,10 @@ class ShikshaPlatformChannel(
             }
 
             override fun onCancel(arguments: Any?) {
+                // EventChannel.onCancel fires when a stream closes or client unlistens.
+                // Do NOT invoke LlamaBridge.stopGeneration() here, because completed requests
+                // will inadvertently cancel newly queued requests.
                 streamEventSink = null
-                LlamaBridge.stopGeneration()
             }
         })
     }
@@ -39,11 +42,12 @@ class ShikshaPlatformChannel(
             "loadModel" -> {
                 var path = call.argument<String>("model_path")
                 if (path.isNullOrEmpty() && context != null) {
-                    val appPrivateModel = File(context.filesDir, "qwen3_k8_tutor_q4_k_m.gguf")
-                    if (appPrivateModel.exists()) {
-                        path = appPrivateModel.absolutePath
-                    } else {
-                        path = "/data/data/org.shiksha.shiksha_app/files/qwen3_k8_tutor_q4_k_m.gguf"
+                    val baseModel = File(context.filesDir, "qwen3_base_q4_k_m.gguf")
+                    val k8Model = File(context.filesDir, "qwen3_k8_tutor_q4_k_m.gguf")
+                    path = when {
+                        baseModel.exists() -> baseModel.absolutePath
+                        k8Model.exists() -> k8Model.absolutePath
+                        else -> "/data/data/org.shiksha.shiksha_app/files/qwen3_base_q4_k_m.gguf"
                     }
                 }
                 
@@ -56,10 +60,12 @@ class ShikshaPlatformChannel(
                 ))
             }
             "unloadModel" -> {
+                activeGenerationJob?.cancel()
                 LlamaBridge.unloadModel()
                 result.success(mapOf("status" to "unloaded"))
             }
             "stopGeneration" -> {
+                activeGenerationJob?.cancel()
                 LlamaBridge.stopGeneration()
                 result.success(mapOf("cancelled" to true))
             }
@@ -67,8 +73,8 @@ class ShikshaPlatformChannel(
                 result.success(mapOf(
                     "engine" to "llama.cpp Android",
                     "format" to "GGUF Q4_K_M",
-                    "model" to "qwen3_k8_tutor_q4_k_m.gguf",
-                    "size_mb" to 378.32,
+                    "model" to "qwen3_base_q4_k_m.gguf",
+                    "size_mb" to 461.79,
                     "offline" to true
                 ))
             }
@@ -77,7 +83,11 @@ class ShikshaPlatformChannel(
                 val maxTokens = call.argument<Int>("max_tokens") ?: 250
                 val temperature = (call.argument<Double>("temperature") ?: 0.0).toFloat()
                 
-                scope.launch {
+                // Cancel any previous in-flight generation job to guarantee clean sequential state
+                activeGenerationJob?.cancel()
+                LlamaBridge.resetState()
+
+                activeGenerationJob = scope.launch {
                     val success = LlamaBridge.nativeGenerateStream(
                         prompt,
                         maxTokens,

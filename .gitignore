@@ -33,4 +33,5 @@ Thumbs.db
 **/local.properties
 **/.dart_tool/
 shiksha_app/build/
+build-test-ndk/
 

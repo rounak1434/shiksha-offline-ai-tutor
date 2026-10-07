@@ -59,22 +59,18 @@ Students need a reliable, knowledgeable personal tutor that lives directly on a 
 
 ---
 
-## AI Model
+## AI Model & Production Deployment
 
-SHIKSHA is powered by a custom fine-tuned, quantized SLM (Small Language Model):
+> **Note on Deployment Model Selection:**
+> We developed and evaluated a QLoRA fine-tuned SHIKSHA model during experimentation. For the final offline deployment, the original Qwen3-0.6B model was selected for broader/general-purpose robustness and simpler runtime behavior under the target device constraints. Curriculum control is enforced at runtime.
 
 - **Base Architecture:** `Qwen/Qwen3-0.6B` (600M parameters, dense transformer).
-- **Fine-Tuning Method:** QLoRA (Quantized Low-Rank Adaptation) using 4-bit NormalFloat (`NF4`) base quantization with double quantization and `bfloat16` compute precision.
-- **LoRA Configuration:**
-  - Rank ($r$): 16
-  - Alpha ($\alpha$): 32
-  - Target Modules: `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj`
-- **Model Merging:** Adapter weights merged into full 16-bit model weights (`output/qwen3_k8_tutor_merged/`).
-- **GGUF Conversion:** Exported to high-fidelity F16 GGUF using `llama.cpp` tools.
-- **Production Quantization:** Quantized to `Q4_K_M` (medium 4-bit k-quant):
-  - Model file: `output/qwen3_k8_tutor_q4_k_m.gguf`
-  - Model size: **378.32 MB** (396,700,576 bytes)
+- **Research & Experimentation:** QLoRA (Quantized Low-Rank Adaptation) fine-tuning evaluated on 300 held-out examples (artifacts preserved under `output/` and `tests/`).
+- **Production Model Deployment:** Original `Qwen3-0.6B` converted to high-fidelity GGUF and quantized to `Q4_K_M`:
+  - Model file: `output/qwen3_base_q4_k_m.gguf`
+  - Model size: **461.79 MB** (484,220,192 bytes)
   - Context window: 2,048 tokens
+  - Runtime Curriculum Guard: Enforced through structured prompt engineering and syllabus constraints.
 
 ---
 

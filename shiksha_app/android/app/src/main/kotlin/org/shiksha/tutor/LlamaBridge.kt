@@ -13,16 +13,22 @@ object LlamaBridge {
 
     init {
         try {
+            System.loadLibrary("ggml-base")
+            System.loadLibrary("ggml-cpu")
+            System.loadLibrary("ggml")
+            System.loadLibrary("llama")
+            System.loadLibrary("llama-common")
             System.loadLibrary("shiksha_llama")
-            Log.i(TAG, "Successfully loaded native library libshiksha_llama.so")
+            Log.i(TAG, "Successfully loaded native llama.cpp and libshiksha_llama.so")
         } catch (e: UnsatisfiedLinkError) {
-            Log.w(TAG, "Native library libshiksha_llama.so not yet loaded: ${e.message}")
+            Log.w(TAG, "Native library load issue: ${e.message}")
         }
     }
 
     external fun nativeLoadModel(modelPath: String, nThreads: Int, ctxSize: Int): Boolean
     external fun nativeUnloadModel()
     external fun nativeStopGeneration()
+    external fun nativeResetState()
     external fun nativeGenerateStream(
         prompt: String,
         maxTokens: Int,
@@ -44,6 +50,14 @@ object LlamaBridge {
             nativeUnloadModel()
         } catch (e: Throwable) {
             Log.e(TAG, "Error unloading model: ${e.message}")
+        }
+    }
+
+    fun resetState() {
+        try {
+            nativeResetState()
+        } catch (e: Throwable) {
+            Log.e(TAG, "Error resetting state: ${e.message}")
         }
     }
 
