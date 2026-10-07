@@ -1,0 +1,557 @@
+Absolutely, Rounak. This problem is basically asking you to **build a mini ChatGPT-like AI tutor that runs directly on a cheap Android phone without internet**. The interesting part is that you **cannot depend on cloud AI**.
+
+Let’s break it down simply. 👇
+
+---
+
+# 🎯 Problem in one sentence
+
+> **Build an AI tutor that can run completely offline on an ~₹8,000 Android phone, answer school-subject questions, explain them step-by-step, stay within the curriculum, and use very little memory/storage.**
+
+Think:
+
+**ChatGPT for students → but tiny → offline → cheap phone → school curriculum focused.**
+
+---
+
+# 🧑‍🎓 Why is this needed?
+
+The problem statement says students in **low-connectivity regions** may not have reliable access to:
+
+* Fast internet
+* Expensive cloud AI services
+* Powerful computers
+* Online tutoring platforms
+
+For example, imagine a student has a ₹8,000 Android phone with:
+
+* 4 GB RAM
+* Limited storage
+* No internet
+
+They should still be able to ask:
+
+> "Explain Newton's second law."
+
+And the phone should respond:
+
+> "Newton's second law states that force is equal to mass multiplied by acceleration..."
+
+Then perhaps:
+
+> **Step 1:** Identify the mass...
+> **Step 2:** Identify the acceleration...
+> **Step 3:** Apply F = ma...
+
+All of that happens **on the phone itself**.
+
+---
+
+# 🧠 What exactly do you have to build?
+
+There are basically **4 major components**.
+
+## 1. A Small Language Model
+
+The first requirement is:
+
+> "A compressed, fine-tuned small language model that answers subject questions aligned to a school curriculum."
+
+You don't want something huge like a 70B-parameter model.
+
+You'd start with a relatively small model, for example:
+
+* 0.5B
+* 1.5B
+* 3B parameters
+
+depending on what the target phone can handle.
+
+The model should be trained/fine-tuned to behave like a **school tutor**, rather than a general chatbot.
+
+For example:
+
+### Normal LLM
+
+Student:
+
+> What is photosynthesis?
+
+Model:
+
+> Photosynthesis is a process used by plants...
+
+Fine.
+
+But it might also start answering unrelated questions.
+
+### Your model
+
+Student:
+
+> Explain photosynthesis.
+
+AI:
+
+> **Photosynthesis** is the process by which green plants make food using sunlight.
+
+**Step 1:** Plants absorb sunlight using chlorophyll.
+**Step 2:** Roots absorb water.
+**Step 3:** Leaves take in carbon dioxide.
+**Step 4:** Glucose and oxygen are produced.
+
+That's much closer to the required behavior.
+
+---
+
+# 📱 2. The AI must run ON the phone
+
+This is probably the **most important part**.
+
+Normally:
+
+```text
+Phone
+  ↓
+Internet
+  ↓
+Cloud Server
+  ↓
+Large AI Model
+  ↓
+Answer
+```
+
+You're being asked to build:
+
+```text
+             ┌─────────────────┐
+             │   Android App   │
+             │                 │
+Student ────►│   Small LLM     │
+             │       ↓         │
+             │   AI Answer     │
+             └─────────────────┘
+```
+
+**No internet.**
+
+The model itself is stored on the phone.
+
+So even if the student turns on airplane mode:
+
+```text
+📱 Airplane Mode
+       ↓
+   Ask Question
+       ↓
+   Local AI Model
+       ↓
+     Answer
+```
+
+It should continue working.
+
+---
+
+# 💾 3. The model needs to be REALLY small
+
+This is where the technical challenge comes in.
+
+A normal LLM can be several GB or tens of GB.
+
+An ₹8,000 phone can't comfortably run something enormous.
+
+So you need techniques like:
+
+### Quantization
+
+Suppose your model normally stores weights using 16-bit numbers.
+
+You can reduce them to:
+
+```text
+FP16 → INT8 → INT4
+```
+
+This dramatically reduces model size and memory requirements.
+
+For example, conceptually:
+
+```text
+Original model
+      ↓
+   4-bit
+      ↓
+Much smaller model
+      ↓
+Runs on weaker hardware
+```
+
+The tradeoff is:
+
+> **Smaller/faster model ↔ potentially lower accuracy**
+
+Your job is to find a good balance.
+
+---
+
+# 🧪 4. You need to fine-tune it
+
+You aren't just downloading a small model and calling it done.
+
+The problem specifically asks for a **fine-tuned model**.
+
+You could take a suitable base model and train it on curriculum-focused examples.
+
+For example:
+
+```text
+Question:
+What is Ohm's Law?
+
+Answer:
+Ohm's Law states that...
+
+Explanation:
+Step 1...
+Step 2...
+Step 3...
+```
+
+You'd ideally create a dataset covering the target school curriculum.
+
+For example:
+
+```text
+Mathematics
+ ├── Algebra
+ ├── Geometry
+ ├── Trigonometry
+
+Science
+ ├── Physics
+ ├── Chemistry
+ └── Biology
+
+Computer Science
+ ├── Algorithms
+ ├── Programming
+ └── Networks
+```
+
+The exact curriculum should be determined by the competition's intended educational scope.
+
+---
+
+# 🛡️ 5. Safety layer
+
+This part is easy to underestimate.
+
+The model shouldn't just answer **anything**.
+
+Suppose a student asks:
+
+> "Tell me how to hack someone's Instagram."
+
+Your educational tutor shouldn't happily provide instructions.
+
+Or:
+
+> "Write me a university-level quantum physics paper."
+
+The system could determine that the question is outside its intended educational scope.
+
+You can put a layer between the user and model:
+
+```text
+User Question
+      ↓
+┌──────────────────┐
+│ Safety / Scope   │
+│     Filter       │
+└────────┬─────────┘
+         ↓
+      AI Model
+         ↓
+     AI Answer
+```
+
+This layer can check:
+
+### 1. Is it educational?
+
+### 2. Is it within the supported curriculum?
+
+### 3. Is the question safe?
+
+### 4. Should the model answer or refuse?
+
+---
+
+# 📚 6. "Step-by-step explanation style"
+
+This is explicitly required.
+
+They don't want:
+
+> **Answer: 42**
+
+They want something more like:
+
+> **Let's solve it step-by-step.**
+>
+> Given:
+>
+> `2x + 4 = 10`
+>
+> **Step 1:** Subtract 4 from both sides.
+>
+> `2x = 6`
+>
+> **Step 2:** Divide both sides by 2.
+>
+> `x = 3`
+>
+> **Answer: x = 3**
+
+So the AI needs to behave like a **teacher**, not merely an answer generator.
+
+---
+
+# 📊 7. You have to prove your model actually works
+
+The problem specifically asks for:
+
+> "An evaluation comparing accuracy, speed and memory against larger cloud models."
+
+This means you need **benchmarks**.
+
+For example:
+
+| Model                | Accuracy | Response Time |    RAM |
+| -------------------- | -------: | ------------: | -----: |
+| Your 1B model        |      82% |       2.1 sec | 1.2 GB |
+| Larger 3B model      |      89% |       5.4 sec | 2.8 GB |
+| Cloud model          |      94% |      1.5 sec* |  Cloud |
+| Your quantized model |      80% |       1.4 sec | 700 MB |
+
+`*` The exact values would need to come from your actual testing.
+
+The important thing isn't to make up impressive numbers.
+
+You actually **measure them**.
+
+---
+
+# 📱 What would your final Android app look like?
+
+Something relatively simple:
+
+```text
+┌──────────────────────────┐
+│      AI TUTOR            │
+│                          │
+│  📚 Mathematics          │
+│  🔬 Science              │
+│  💻 Computer Science     │
+│                          │
+│  ──────────────────────  │
+│                          │
+│  Ask your question...    │
+│                          │
+│                    ➤     │
+└──────────────────────────┘
+```
+
+Student asks:
+
+> "Why does an object fall toward Earth?"
+
+And your local model answers.
+
+No internet.
+
+---
+
+# 🏗️ A possible technical architecture
+
+A strong implementation could look like:
+
+```text
+                    ANDROID PHONE
+┌─────────────────────────────────────────┐
+│                                         │
+│              Android UI                 │
+│                 ↓                       │
+│          Question Handler               │
+│                 ↓                       │
+│       Safety / Curriculum Filter       │
+│                 ↓                       │
+│        Local Inference Engine           │
+│                 ↓                       │
+│       Quantized SLM (INT4/INT8)         │
+│                 ↓                       │
+│        Step-by-step response            │
+│                                         │
+└─────────────────────────────────────────┘
+                    │
+                    X
+                 INTERNET
+              NOT REQUIRED
+```
+
+---
+
+# 🔬 The important ML concepts
+
+The problem explicitly mentions four things:
+
+### 1. Quantization
+
+Make the model smaller and faster.
+
+```text
+FP16
+ ↓
+INT8
+ ↓
+INT4
+```
+
+---
+
+### 2. Distillation
+
+Take knowledge/behavior from a **larger teacher model** and transfer it into a **smaller student model**.
+
+```text
+      Large LLM
+       Teacher
+          │
+          ↓
+   Training examples
+          │
+          ↓
+      Small LLM
+       Student
+```
+
+This is particularly relevant here because you want a tiny model that behaves reasonably well.
+
+---
+
+### 3. Curriculum alignment
+
+The AI shouldn't just know random internet information.
+
+It should be optimized around your target curriculum.
+
+For example:
+
+```text
+School Curriculum
+       ↓
+Educational Dataset
+       ↓
+Fine-tuning
+       ↓
+Small Tutor Model
+```
+
+---
+
+### 4. Evaluation
+
+You need to demonstrate:
+
+**Accuracy**
+
+> Does it give the correct answer?
+
+**Latency**
+
+> How quickly does it answer?
+
+**Memory**
+
+> How much RAM does it consume?
+
+**Model size**
+
+> How much storage does it require?
+
+**Offline functionality**
+
+> Does it work with Wi-Fi/mobile data completely disabled?
+
+---
+
+# 🏆 What the judges are probably looking for
+
+The key is that this isn't simply an **"AI chatbot app"** problem.
+
+The real challenge is:
+
+> **Can you make useful AI small enough to run locally on extremely cheap hardware?**
+
+Your strongest demo would therefore be:
+
+### Step 1
+
+Turn **Wi-Fi OFF**.
+
+### Step 2
+
+Turn **mobile data OFF**.
+
+### Step 3
+
+Open your Android app.
+
+### Step 4
+
+Ask a curriculum question.
+
+### Step 5
+
+Get an answer from your local model.
+
+### Step 6
+
+Show:
+
+```text
+Model: Your-SLM-1.5B
+Quantization: INT4
+Model Size: XXX MB
+RAM Usage: XXX MB
+Inference: XXX sec
+Internet: OFFLINE
+```
+
+That would make the core idea very obvious.
+
+---
+
+# 🧩 The entire problem reduced to 5 things
+
+If I were explaining this to your hackathon team in one minute:
+
+> **We need to build an offline AI teacher for cheap Android phones.**
+>
+> **1.** Take a small language model and fine-tune it for a specific school curriculum.
+>
+> **2.** Compress/quantize it so it can run on an ~₹8,000 Android phone.
+>
+> **3.** Build an Android application that runs the model completely locally without internet.
+>
+> **4.** Make the AI explain answers step-by-step and prevent unsafe/out-of-curriculum responses.
+>
+> **5.** Benchmark our model against larger models for **accuracy, speed, memory usage, and model size**.
+
+### The core challenge:
+
+**How much intelligence can we squeeze into a tiny model that can run on a cheap phone?** 📱🧠
+
+And honestly, **that is the part I'd focus your team's innovation around**—not making a fancy chatbot UI. The UI can be simple; the ML + on-device optimization + measurable performance is where the problem is actually won.

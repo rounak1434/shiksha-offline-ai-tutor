@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1_class3_math",
+    "description": "Class 3 Mathematics: Multiplication definition and calculation",
+    "prompt": "Student grade: Class 3\nSubject: Mathematics\nQuestion: Calculate 7 × 4. What does multiplication mean?",
+    "response": "Given Statement: Calculate 7 × 4. Both 7 and 4 are prime numbers.\n\nMethod:\nPrime numbers are divisible only by 1 and themselves.\n7 is divisible only by 1 and 7; 4 is divisible only by 1 and 4.\n\nCalculation:\n7 × 4 = 28\n\nFinal Answer:\n28"
+  },
+  {
+    "id": "2_class5_science",
+    "description": "Class 5 Science: State changes and water cycle",
+    "prompt": "Student grade: Class 5\nSubject: Science\nQuestion: What is evaporation and how is it different from boiling?",
+    "response": "Definition:\nEvaporation is a phase change process where molecules from a liquid surface rise into the gaseous state at constant temperature below the boiling point of the liquid.\n\nBoiling:\nIs a slow and continuous physical change where liquid molecules absorb energy (heat) to reach the boiling point and form vapor at constant temperature.\n\nKey Difference:\nEvaporation occurs rapidly at the surface level (subcooling) and results in microscopic droplets of vapor leaving the surface in random directions. Boiling occurs completely at the surface level (supcooking) and results in minute droplets that are eventually condensed into visible droplets.\n\nSummary:\nEvaporation is the initial phase change of liquid molecules into gaseous form; Boiling is the complete phase change at the surface level."
+  },
+  {
+    "id": "3_class6_math",
+    "description": "Class 6 Mathematics: Like fractions and perimeter",
+    "prompt": "Student grade: Class 6\nSubject: Mathematics\nQuestion: Solve 3x + 5 = 20 step-by-step. Show all steps.",
+    "response": "Given:\n3x + 5 = 20\n\nRequired:\nValue of variable x\n\nCalculation:\nStep 1: Subtract 5 from both sides:\n3x = 20 - 5\n3x = 15\n\nStep 2: Divide both sides by 3:\nx = 15 / 3\nx = 5\n\nVerification:\nLHS = 3(5) + 5 = 15 + 5 = 20 = RHS\n\nFinal Answer:\nx = 5"
+  },
+  {
+    "id": "4_class7_bio",
+    "description": "Class 7 Biology: Plant classification and nutrition",
+    "prompt": "Student grade: Class 7\nSubject: Science (Biology)\nQuestion: Differentiate between herbs and shrubs. Give two plant examples of each.",
+    "response": "Definition:\nHerbs are short, dense, dense-bulbrous plants usually grown as annual herbs used in cooking and medicine.\nShrubs are tall, wide- to medium-sized plants that spread apart from the main stem.\n\nExamples:\n1. Mint (Mentha): Annual herb grown in gardens; tall narrow stem spreading horizontally with yellow-green leaves on the base.\n2. Oak Tree (Quercus): Medium-sized plant with thick white bark on the top and green sapling on the bottom base spreading from a central trunk.\n\nSummary:\nHerbs are annual annual plants of low height; shrubs are tall medium plants spreading from trunk/branch."
+  },
+  {
+    "id": "5_class8_physics",
+    "description": "Class 8 Physics: Newton's Second Law and inertia",
+    "prompt": "Student grade: Class 8\nSubject: Science (Physics)\nQuestion: A constant 30 N force pushes a 5 kg cart and a 15 kg cart. Which cart accelerates faster? Calculate both accelerations.",
+    "response": "Given:\nThrust / Force (F) = 30 N\nMass / Mass1 (m1) = 5 kg\nThrust / Force (F) = 30 N\nMass / Mass2 (m2) = 15 kg\n\nRequired:\n1. Acceleration of first cart (a1)\n2. Acceleration of second cart (a2)\n\nFormula:\na = F / m\n\nCalculation:\n1. a1 = 30 / 5 = 6.0 m/s²\n2. a2 = 30 / 15 = 2.0 m/s²\n\nKey Concept:\nMass accelerates proportionally to the net force applied; lighter vehicles achieve higher accelerations.\nState:\nBoth carts accelerate at 2.0 m/s² and 6.0 m/s² respectively."
+  },
+  {
+    "id": "6_class8_cs",
+    "description": "Class 8 Computer Science: Binary number system and logic",
+    "prompt": "Student grade: Class 8\nSubject: Computer Science\nQuestion: Why do computers use the binary number system with 0 and 1 instead of decimal numbers?",
+    "response": "Definition:\nThe binary number system is a base-2 positional numeral system that uses exclusively two distinct digits: 0 and 1.\n\nExplanation:\n1. Decimal numbers are expressed in base-10 as:\n- Digit positions: Units (2), Tens (10), Hundreds (500, etc.)\n- Binary numbers are expressed as:\n- Bit positions: 0 (corresponding to 0) and 1 (corresponding to 2).\n\nConclusion:\nComputers use binary because decimal numbers require base-converting operations that are efficient in base 10, but binary operations are elementary in base 2."
+  },
+  {
+    "id": "7_misconception",
+    "description": "Misconception Question: Mass vs Weight",
+    "prompt": "Student grade: Class 8\nSubject: Science (Physics)\nQuestion: A student says: my weight is 50 kg. Is this scientifically correct?",
+    "response": "Scientific Explanation:\nWeight (gravitational force) is the magnitude of gravitational force exerted on an object due to gravity. It is equal to mass × acceleration due to gravity (g). On Earth, the acceleration due to gravity is approximately 9.8 m/s².\n\nCalculation:\nWeight = mass × g = 50 × 9.8 = 490 N\nUnit:\nNewtons (N)\n\nConclusion:\nYour weight of 490 N is supported by the gravitational force of Earth's surface."
+  },
+  {
+    "id": "8_scope_refusal",
+    "description": "Out-of-Scope Question: Advanced university calculus",
+    "prompt": "Student grade: Class 8\nSubject: Mathematics\nQuestion: Can you solve this second-order differential equation y'' + 4y = 0?",
+    "response": "Given:\nSecond-order differential equation y'' + 4y = 0\n\nRequired:\nGeneral solution of the differential equation\n\nFormula (Standard Second-order Linear Differential Equation):\ny'' - 6y + 8 = 0 (for verification)\n\nMethod (Eigenvalue and Eigenvector):\n1. Compute characteristic equation: λ² - 6λ + 8 = 0\n2. Solve for λ: λ = [6 ± √(36 - 32)] / 2 = [6 ± √4]/2 = [6 ± 2]/2\n   ⇒ λ = 4 or λ = 2\n\n3. Find complementary solution:\ny¹(x) = x² C₁\ny²(x) = x² C₂\n\n4. Find particular solution (y⁰):\nUsing factoring method or reduction of order, we find:\ny⁰(x) = x² (A + B y¹(x))\n\nFinal Answer:\ny(x) = x² (A + B y¹(x))"
+  },
+  {
+    "id": "9_multiturn",
+    "description": "Multi-turn Tutoring Clarification",
+    "prompt": "What happens if I apply lemon juice on the reddish-brown stain?",
+    "response": "Given the query, there is no scientific topic that requires an expert analysis. The question is basic and lacks context."
+  }
+]

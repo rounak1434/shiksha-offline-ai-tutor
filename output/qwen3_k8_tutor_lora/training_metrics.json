@@ -1,0 +1,20 @@
+{
+  "model_id": "Qwen/Qwen3-0.6B",
+  "train_samples": 1500,
+  "val_samples": 200,
+  "test_samples": 300,
+  "epochs_completed": 1,
+  "global_steps": 750,
+  "effective_batch_size": 2,
+  "learning_rate": 0.0002,
+  "train_loss": 0.4075,
+  "val_loss": 0.1125,
+  "peak_vram_gb": 1.74,
+  "total_vram_gb": 4.0,
+  "training_time_seconds": 969.44,
+  "trainable_parameters": 2293760,
+  "total_parameters": 598343680,
+  "adapter_size_bytes": 16047108,
+  "adapter_dir": "C:\\Rounak\\RVSHACK\\output\\qwen3_k8_tutor_lora",
+  "status": "PASS"
+}

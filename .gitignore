@@ -1,0 +1,32 @@
+# Virtual environments & caches
+.venv/
+.hf_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Large model artifacts and weights (>100MB / binary checkpoints)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+output/qwen3_tutor_merged/
+output/qwen3_k8_tutor_merged/
+output/qwen3_offline_tutor_lora/adapter_model.safetensors
+output/qwen3_k8_tutor_lora/adapter_model.safetensors
+checkpoints/
+
+# Cloned llama.cpp external build repo
+llama.cpp/
+
+# Logs and screenshots
+*.log
+Screenshot*.png
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

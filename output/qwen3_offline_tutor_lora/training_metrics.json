@@ -1,0 +1,16 @@
+{
+  "model_id": "Qwen/Qwen3-0.6B",
+  "train_samples": 39,
+  "num_epochs": 3,
+  "training_loss": 1.2872456312179565,
+  "peak_vram_gb": 1.71,
+  "elapsed_seconds": 116.86,
+  "lora_r": 8,
+  "lora_alpha": 16,
+  "target_modules": [
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj"
+  ]
+}
