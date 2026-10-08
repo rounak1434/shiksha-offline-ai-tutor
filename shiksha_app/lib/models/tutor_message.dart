@@ -4,33 +4,57 @@ enum MessageSender { student, tutor }
 
 class StructuredResponse {
   final String? definition;
-  final String? given;
-  final String? formula;
-  final List<String> steps;
+  final String? explanation;
+  final String? keyPrinciple;
   final String? example;
   final String? summary;
+
+  // Numerical / calculation fields
+  final String? given;
+  final String? required;
+  final String? formula;
+  final String? rearrangement;
+  final String? substitution;
+  final String? calculation;
+  final String? unit;
   final String? finalAnswer;
+
+  final List<String> steps;
   final String? rawContent;
 
   StructuredResponse({
     this.definition,
-    this.given,
-    this.formula,
-    this.steps = const [],
+    this.explanation,
+    this.keyPrinciple,
     this.example,
     this.summary,
+    this.given,
+    this.required,
+    this.formula,
+    this.rearrangement,
+    this.substitution,
+    this.calculation,
+    this.unit,
     this.finalAnswer,
+    this.steps = const [],
     this.rawContent,
   });
 
   bool get hasStructuredSections =>
       definition != null ||
-      given != null ||
-      formula != null ||
-      steps.isNotEmpty ||
+      explanation != null ||
+      keyPrinciple != null ||
       example != null ||
       summary != null ||
-      finalAnswer != null;
+      given != null ||
+      required != null ||
+      formula != null ||
+      rearrangement != null ||
+      substitution != null ||
+      calculation != null ||
+      unit != null ||
+      finalAnswer != null ||
+      steps.isNotEmpty;
 }
 
 class TutorMessage {

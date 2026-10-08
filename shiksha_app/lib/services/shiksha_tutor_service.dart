@@ -148,18 +148,23 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
     final sub = (subject ?? '').toLowerCase();
 
     // Step-by-step math or numerical problem solving
-    final isMath = sub.contains('math') ||
+    final isMathOrNumerical = sub.contains('math') ||
+        (sub.contains('physics') && (q.contains('calculate') || q.contains('find') || q.contains('force') || q.contains('acceleration') || RegExp(r'\d+').hasMatch(q))) ||
+        (sub.contains('science') && (q.contains('calculate') || q.contains('find') || q.contains('force') || q.contains('acceleration') || RegExp(r'\d+').hasMatch(q))) ||
         q.contains('solve') ||
         q.contains('calculate') ||
         q.contains('equation') ||
+        q.contains('acceleration') ||
+        q.contains('velocity') ||
+        q.contains('speed') ||
         q.contains('+') ||
         q.contains('-') ||
         q.contains('*') ||
         q.contains('/') ||
         q.contains('=');
 
-    if (isMath) {
-      return 160; // Step-by-step math ceiling
+    if (isMathOrNumerical) {
+      return 180; // Full 8-step calculation reasoning ceiling
     }
 
     // Conceptual explanation questions
@@ -215,12 +220,20 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
       return controller.stream;
     }
 
+    final qLower = question.trim().toLowerCase();
     final isMathOrNumerical = effectiveSubject.toLowerCase().contains('math') ||
         (effectiveSubject.toLowerCase().contains('physics') &&
-            (question.contains('calculate') || question.contains('find') || RegExp(r'\d+').hasMatch(question)));
+            (qLower.contains('calculate') || qLower.contains('find') || qLower.contains('force') || qLower.contains('acceleration') || RegExp(r'\d+').hasMatch(qLower))) ||
+        (effectiveSubject.toLowerCase().contains('science') &&
+            (qLower.contains('calculate') || qLower.contains('find') || qLower.contains('force') || qLower.contains('acceleration') || RegExp(r'\d+').hasMatch(qLower))) ||
+        qLower.contains('solve') ||
+        qLower.contains('calculate') ||
+        qLower.contains('equation') ||
+        qLower.contains('acceleration') ||
+        qLower.contains('=');
 
     final structureInstruction = isMathOrNumerical
-        ? "For numerical, math, or problem-solving questions, use these structured headings where applicable:\n"
+        ? "For numerical, math, or calculation questions, you MUST provide complete step-by-step reasoning using these EXACT headings:\n"
           "Given:\n"
           "Required:\n"
           "Formula:\n"
@@ -228,13 +241,39 @@ class ShikshaPlatformTutorService implements IShikshaTutorService {
           "Substitution:\n"
           "Calculation:\n"
           "Unit:\n"
-          "Final Answer:"
-        : "For conceptual questions, use these structured headings where applicable:\n"
+          "Final Answer:\n\n"
+          "Formatting rules:\n"
+          "- You MUST include ALL 8 headings in this exact order without skipping any:\n"
+          "  1. Given:\n  2. Required:\n  3. Formula:\n  4. Rearrangement:\n  5. Substitution:\n  6. Calculation:\n  7. Unit:\n  8. Final Answer:\n"
+          "- For algebra where there is no physical unit, write: Unit:\nNot applicable\n"
+          "- Do NOT invent a unit for pure algebra.\n"
+          "- For physics, write the physical unit under Unit: (e.g. m/s², N, kg).\n"
+          "- Write all math in plain readable text: write fractions as (a) / b or a / b. NEVER use LaTeX \$, \\text{}, or \\frac{}.\n"
+          "Example for algebra:\n"
+          "Given:\n3x + 5 = 20\n"
+          "Required:\nx\n"
+          "Formula:\n3x = 20 - 5\n"
+          "Rearrangement:\nx = (20 - 5) / 3\n"
+          "Substitution:\nx = 15 / 3\n"
+          "Calculation:\nx = 5\n"
+          "Unit:\nNot applicable\n"
+          "Final Answer:\nx = 5\n\n"
+          "Example for physics:\n"
+          "Given:\nF = 30 N\nm = 5 kg\n"
+          "Required:\na\n"
+          "Formula:\nF = ma\n"
+          "Rearrangement:\na = F / m\n"
+          "Substitution:\na = 30 / 5\n"
+          "Calculation:\na = 6\n"
+          "Unit:\nm/s²\n"
+          "Final Answer:\na = 6 m/s²"
+        : "For conceptual questions, use these structured headings:\n"
           "Definition:\n"
           "Explanation:\n"
           "Key Principle:\n"
           "Example/Application:\n"
-          "Summary:";
+          "Summary:\n"
+          "Write all text clearly in plain English without LaTeX symbols.";
 
     final controller = StreamController<InferenceChunk>();
     final StringBuffer accumulated = StringBuffer();

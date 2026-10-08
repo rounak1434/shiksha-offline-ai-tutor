@@ -720,18 +720,62 @@ class _ChatScreenState extends State<ChatScreen> {
               _buildSectionBody(structured.definition!),
               _buildSectionDivider(),
             ],
+            if (structured.explanation != null && structured.explanation!.isNotEmpty) ...[
+              _buildSectionTitle('Explanation:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.explanation!),
+              _buildSectionDivider(),
+            ],
+            if (structured.keyPrinciple != null && structured.keyPrinciple!.isNotEmpty) ...[
+              _buildSectionTitle('Key Principle:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.keyPrinciple!),
+              _buildSectionDivider(),
+            ],
             if (structured.given != null && structured.given!.isNotEmpty) ...[
               _buildSectionTitle('Given:'),
               const SizedBox(height: 4),
               _buildSectionBody(structured.given!),
               _buildSectionDivider(),
             ],
+            if (structured.required != null && structured.required!.isNotEmpty) ...[
+              _buildSectionTitle('Required:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.required!),
+              _buildSectionDivider(),
+            ],
             if (structured.formula != null && structured.formula!.isNotEmpty) ...[
-              _buildSectionTitle('Formula: ${structured.formula!}'),
+              _buildSectionTitle('Formula:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.formula!),
+              _buildSectionDivider(),
+            ],
+            if (structured.rearrangement != null && structured.rearrangement!.isNotEmpty) ...[
+              _buildSectionTitle('Rearrangement:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.rearrangement!),
+              _buildSectionDivider(),
+            ],
+            if (structured.substitution != null && structured.substitution!.isNotEmpty) ...[
+              _buildSectionTitle('Substitution:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.substitution!),
+              _buildSectionDivider(),
+            ],
+            if (structured.calculation != null && structured.calculation!.isNotEmpty) ...[
+              _buildSectionTitle('Calculation:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.calculation!),
+              _buildSectionDivider(),
+            ],
+            if (structured.unit != null && structured.unit!.isNotEmpty) ...[
+              _buildSectionTitle('Unit:'),
+              const SizedBox(height: 4),
+              _buildSectionBody(structured.unit!),
               _buildSectionDivider(),
             ],
             if (structured.steps.isNotEmpty) ...[
-              _buildSectionTitle('Explanation:'),
+              _buildSectionTitle('Steps:'),
               const SizedBox(height: 4),
               ...structured.steps.map((step) => Padding(
                     padding: const EdgeInsets.only(bottom: 4),
@@ -749,6 +793,8 @@ class _ChatScreenState extends State<ChatScreen> {
               _buildSectionTitle('Summary:'),
               const SizedBox(height: 4),
               _buildSectionBody(structured.summary!),
+              if (structured.finalAnswer != null && structured.finalAnswer!.isNotEmpty)
+                _buildSectionDivider(),
             ],
             if (structured.finalAnswer != null && structured.finalAnswer!.isNotEmpty) ...[
               _buildSectionTitle('Final Answer:'),
@@ -756,11 +802,11 @@ class _ChatScreenState extends State<ChatScreen> {
               _buildSectionBody(structured.finalAnswer!),
             ],
           ] else ...[
-            // Streaming or plain text fallback
+            // Streaming or plain text fallback with cleaned math text
             Text(
               message.content.trim().isEmpty && message.isGenerating
                   ? 'Analyzing question offline...'
-                  : message.content.trim(),
+                  : ResponseParser.cleanMath(message.content.trim()),
               style: const TextStyle(
                 color: Color(0xFFCBD5E1),
                 fontSize: 14,
